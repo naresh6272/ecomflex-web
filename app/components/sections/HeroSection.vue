@@ -96,6 +96,7 @@ function animateCountUp() {
 let worker:    Worker | null     = null
 let resizeObs: ResizeObserver | null = null
 
+
 // ── Mouse → worker (throttled naturally by worker's animation loop) ──────────
 function onMouse(e: MouseEvent) {
   worker?.postMessage({
@@ -140,11 +141,9 @@ onMounted(async () => {
   const W = canvas.clientWidth  || window.innerWidth
   const H = canvas.clientHeight || window.innerHeight
 
-  // Spawn Three.js worker
-  worker = new Worker(
-    new URL('../../workers/hero.worker.ts', import.meta.url),
-    { type: 'module' },
-  )
+  // Spawn Three.js worker using Vite's ?worker syntax for correct production bundling
+  const { default: HeroWorker } = await import('../../workers/hero.worker.ts?worker')
+  worker = new HeroWorker()
 
   // Transfer canvas control to worker — main thread can no longer touch it
   const offscreen = canvas.transferControlToOffscreen()
