@@ -93,19 +93,15 @@ function animateCountUp() {
   })
 }
 
-let worker:    Worker | null     = null
 let resizeObs: ResizeObserver | null = null
+let threeRenderer: any = null
+const mouse = { x: 0, y: 0 }
 
-// ── Mouse → worker (throttled naturally by worker's animation loop) ──────────
 function onMouse(e: MouseEvent) {
-  worker?.postMessage({
-    type: 'mouse',
-    x: (e.clientX / window.innerWidth)  * 2 - 1,
-    y: (e.clientY / window.innerHeight) * 2 - 1,
-  })
+  mouse.x = (e.clientX / window.innerWidth)  * 2 - 1
+  mouse.y = (e.clientY / window.innerHeight) * 2 - 1
 }
 
-// ── Magnetic button effect (main thread only, no Three.js needed) ────────────
 function initMagnetic() {
   document.querySelectorAll('[data-magnetic]').forEach(el => {
     const btn = el as HTMLElement
@@ -117,7 +113,6 @@ function initMagnetic() {
   })
 }
 
-// ── GSAP entrance ─────────────────────────────────────────────────────────────
 async function runEntrance() {
   const { gsap } = await import('gsap')
   const tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
@@ -131,54 +126,168 @@ async function runEntrance() {
   animateCountUp()
 }
 
-// ── Lifecycle ─────────────────────────────────────────────────────────────────
+async function initThree(canvas: HTMLCanvasElement, W: number, H: number) {
+  const THREE = await import('three')
+
+  const NODE_COUNT = 38, MAX_LINES = 140, PACKET_COUNT = 16, MAX_DIST_SQ = 14 * 14
+  const ACCENT = 0x06b6d4, ACCENT2 = 0xf59e0b, ACCENT3 = 0x6366f1
+
+  const scene  = new THREE.Scene()
+  const camera = new THREE.PerspectiveCamera(60, W / H, 0.1, 500)
+  camera.position.set(0, 0, 38)
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: 'high-performance' })
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+  renderer.setSize(W, H, false)
+  renderer.setClearColor(0x06090f, 1)
+  threeRenderer = renderer
+
+  // Stars
+  const starPos = new Float32Array(1000 * 3)
+  for (let i = 0; i < starPos.length; i++) starPos[i] = (Math.random() - 0.5) * 210
+  const starGeo = new THREE.BufferGeometry()
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3))
+  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.13, transparent: true, opacity: 0.28 }))
+  scene.add(stars)
+
+  // Network nodes
+  const nodesMeshes: any[] = [], nodeVelocities: any[] = []
+  const nodeGeo = new THREE.SphereGeometry(0.18, 6, 6)
+  for (let i = 0; i < NODE_COUNT; i++) {
+    const bright = Math.random() > 0.65
+    const mat = new THREE.MeshBasicMaterial({ color: bright ? ACCENT : (Math.random() > 0.5 ? ACCENT2 : ACCENT3), transparent: true, opacity: bright ? 0.95 : 0.55 })
+    const m = new THREE.Mesh(nodeGeo, mat)
+    m.position.set((Math.random() - 0.5) * 70, (Math.random() - 0.5) * 46, (Math.random() - 0.5) * 30 - 4)
+    scene.add(m); nodesMeshes.push(m)
+    nodeVelocities.push(new THREE.Vector3((Math.random() - 0.5) * 0.012, (Math.random() - 0.5) * 0.012, (Math.random() - 0.5) * 0.005))
+  }
+
+  // Connection lines
+  const linePositions = new Float32Array(MAX_LINES * 6), lineColors = new Float32Array(MAX_LINES * 6)
+  const lineGeo = new THREE.BufferGeometry()
+  lineGeo.setAttribute('position', new THREE.BufferAttribute(linePositions, 3).setUsage(THREE.DynamicDrawUsage))
+  lineGeo.setAttribute('color',    new THREE.BufferAttribute(lineColors,    3).setUsage(THREE.DynamicDrawUsage))
+  const lineSegments = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 1 }))
+  scene.add(lineSegments)
+
+  // Data packets
+  const dummy = new THREE.Object3D()
+  const packetsMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(0.11, 4, 4), new THREE.MeshBasicMaterial({ color: 0xffffff }), PACKET_COUNT)
+  packetsMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
+  scene.add(packetsMesh)
+  const packetData = Array.from({ length: PACKET_COUNT }, () => ({ from: Math.floor(Math.random() * NODE_COUNT), to: Math.floor(Math.random() * NODE_COUNT), t: Math.random(), speed: 0.004 + Math.random() * 0.012 }))
+
+  // Icosahedron group
+  const icoGroup = new THREE.Group()
+  icoGroup.position.set(22, 1, -8)
+  const innerIcoMat = new THREE.MeshBasicMaterial({ color: 0x06090f, transparent: true, opacity: 0.90 })
+  icoGroup.add(new THREE.Mesh(new THREE.IcosahedronGeometry(9,  1), new THREE.MeshBasicMaterial({ color: ACCENT,  wireframe: true, transparent: true, opacity: 0.28 })))
+  icoGroup.add(new THREE.Mesh(new THREE.IcosahedronGeometry(12, 1), new THREE.MeshBasicMaterial({ color: ACCENT2, wireframe: true, transparent: true, opacity: 0.10 })))
+  icoGroup.add(new THREE.Mesh(new THREE.IcosahedronGeometry(7,  0), innerIcoMat))
+  scene.add(icoGroup)
+
+  // Octahedron
+  const octMesh = new THREE.Mesh(new THREE.OctahedronGeometry(4, 0), new THREE.MeshBasicMaterial({ color: ACCENT, wireframe: true, transparent: true, opacity: 0.18 }))
+  octMesh.position.set(30, -14, -5)
+  scene.add(octMesh)
+
+  // Logo (loads async, non-blocking)
+  fetch('/logo.png').then(r => r.blob()).then(async blob => {
+    const img = await createImageBitmap(blob)
+    const tmpCanvas = document.createElement('canvas')
+    tmpCanvas.width = img.width; tmpCanvas.height = img.height
+    tmpCanvas.getContext('2d')!.drawImage(img, 0, 0)
+    const tex = new THREE.CanvasTexture(tmpCanvas)
+    const LW = 6.0, LH = LW / (img.width / img.height)
+    const logoGroup = new THREE.Group()
+    logoGroup.position.copy(icoGroup.position)
+    const glowMesh = new THREE.Mesh(new THREE.CircleGeometry(LW * 0.80, 64), new THREE.MeshBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.18, side: THREE.DoubleSide, depthTest: false, depthWrite: false }))
+    glowMesh.position.z = -0.6; glowMesh.renderOrder = 10; logoGroup.add(glowMesh)
+    const logoMesh = new THREE.Mesh(new THREE.PlaneGeometry(LW, LH), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 1.0, side: THREE.DoubleSide, depthTest: false, depthWrite: false }))
+    logoMesh.renderOrder = 12; logoGroup.add(logoMesh)
+    const ring = new THREE.Mesh(new THREE.RingGeometry(LW * 0.72, LW * 0.77, 64), new THREE.MeshBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.50, side: THREE.DoubleSide, depthTest: false, depthWrite: false }))
+    ring.position.z = 0.2; ring.renderOrder = 13; logoGroup.add(ring)
+    scene.add(logoGroup)
+    innerIcoMat.opacity = 0; innerIcoMat.depthWrite = false
+  }).catch(() => {})
+
+  // Animation loop on main thread
+  let frameCount = 0
+  renderer.setAnimationLoop(() => {
+    frameCount++
+    for (let i = 0; i < NODE_COUNT; i++) {
+      const p = nodesMeshes[i].position, v = nodeVelocities[i]
+      p.addScaledVector(v, 1)
+      if (Math.abs(p.x) > 36) v.x *= -1
+      if (Math.abs(p.y) > 24) v.y *= -1
+      if (Math.abs(p.z) > 17) v.z *= -1
+    }
+    if (frameCount % 3 === 0) {
+      let cc = 0
+      for (let i = 0; i < NODE_COUNT && cc < MAX_LINES; i++) {
+        const pi = nodesMeshes[i].position
+        for (let j = i + 1; j < NODE_COUNT && cc < MAX_LINES; j++) {
+          const pj = nodesMeshes[j].position
+          const dx = pi.x - pj.x, dy = pi.y - pj.y, dz = pi.z - pj.z
+          const d2 = dx*dx + dy*dy + dz*dz
+          if (d2 < MAX_DIST_SQ) {
+            const a = (1 - d2 / MAX_DIST_SQ) * 0.75
+            const idx = cc * 6
+            linePositions[idx]=pi.x; linePositions[idx+1]=pi.y; linePositions[idx+2]=pi.z
+            linePositions[idx+3]=pj.x; linePositions[idx+4]=pj.y; linePositions[idx+5]=pj.z
+            lineColors[idx]=a*0.08; lineColors[idx+1]=a*0.88; lineColors[idx+2]=a*1.00
+            lineColors[idx+3]=a*0.08; lineColors[idx+4]=a*0.88; lineColors[idx+5]=a*1.00
+            cc++
+          }
+        }
+      }
+      for (let k = cc * 6; k < MAX_LINES * 6; k++) { linePositions[k] = 0; lineColors[k] = 0 }
+      lineSegments.geometry.setDrawRange(0, cc * 2)
+      ;(lineSegments.geometry.attributes.position as any).needsUpdate = true
+      ;(lineSegments.geometry.attributes.color    as any).needsUpdate = true
+    }
+    for (let i = 0; i < PACKET_COUNT; i++) {
+      const pk = packetData[i]; pk.t += pk.speed
+      if (pk.t >= 1) { pk.t = 0; pk.from = pk.to; pk.to = Math.floor(Math.random() * NODE_COUNT) }
+      dummy.position.lerpVectors(nodesMeshes[pk.from].position, nodesMeshes[pk.to].position, pk.t)
+      dummy.updateMatrix(); packetsMesh.setMatrixAt(i, dummy.matrix)
+    }
+    packetsMesh.instanceMatrix.needsUpdate = true
+    icoGroup.rotation.x += 0.0022; icoGroup.rotation.y += 0.0036
+    octMesh.rotation.x  += 0.003;  octMesh.rotation.z  += 0.0025
+    if (frameCount % 5 === 0) stars.rotation.y += 0.0006
+    camera.position.x += (mouse.x * 3  - camera.position.x) * 0.04
+    camera.position.y += (-mouse.y * 2 - camera.position.y) * 0.04
+    camera.lookAt(0, 0, 0)
+    renderer.render(scene, camera)
+  })
+
+  // Handle resize
+  resizeObs = new ResizeObserver(() => {
+    const w = canvas.clientWidth, h = canvas.clientHeight
+    if (!w || !h) return
+    renderer.setSize(w, h, false)
+    camera.aspect = w / h
+    camera.updateProjectionMatrix()
+  })
+  resizeObs.observe(canvas)
+}
+
 onMounted(async () => {
   if (!import.meta.client) return
   await nextTick()
-
   const canvas = canvasRef.value!
   const W = canvas.clientWidth  || window.innerWidth
   const H = canvas.clientHeight || window.innerHeight
-
-  // Spawn Three.js worker
-  worker = new Worker(
-    new URL('../../workers/hero.worker.ts', import.meta.url),
-    { type: 'module' },
-  )
-
-  // Transfer canvas control to worker — main thread can no longer touch it
-  const offscreen = canvas.transferControlToOffscreen()
-  const dpr = Math.min(window.devicePixelRatio || 1, 2)
-  worker.postMessage({ type: 'init', canvas: offscreen, width: W, height: H, dpr }, [offscreen])
-
-  // Always dark
-  worker.postMessage({ type: 'theme', dark: true })
-
-  // Load logo and send as ImageBitmap to worker
-  fetch('/logo.png')
-    .then(r => r.blob())
-    .then(blob => createImageBitmap(blob))
-    .then(bitmap => {
-      worker?.postMessage({ type: 'logo', bitmap }, [bitmap])
-    })
-    .catch(err => console.warn('[hero] logo load failed:', err))
-
-  // Resize → tell worker
-  resizeObs = new ResizeObserver(() => {
-    const w = canvas.clientWidth
-    const h = canvas.clientHeight
-    if (w && h) worker?.postMessage({ type: 'resize', width: w, height: h, dpr })
-  })
-  resizeObs.observe(canvas)
-
   window.addEventListener('mousemove', onMouse, { passive: true })
+  initThree(canvas, W, H)
   runEntrance()
   initMagnetic()
 })
 
 onBeforeUnmount(() => {
-  worker?.postMessage({ type: 'stop' })
-  worker?.terminate()
+  threeRenderer?.setAnimationLoop(null)
+  threeRenderer?.dispose()
   resizeObs?.disconnect()
   window.removeEventListener('mousemove', onMouse)
 })
