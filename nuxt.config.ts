@@ -9,7 +9,17 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxt/image',
     '@vueuse/nuxt',
+    '@nuxtjs/sitemap',
   ],
+
+  site: {
+    url: 'https://ecomflex.in',
+    name: 'ECOMFLEX — Premium Software Development Company',
+  },
+
+  sitemap: {
+    strictNuxtContentPaths: false,
+  },
 
   components: [
     {
