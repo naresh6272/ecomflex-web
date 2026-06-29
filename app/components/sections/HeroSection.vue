@@ -93,8 +93,9 @@ function animateCountUp() {
   })
 }
 
-let resizeObs: ResizeObserver | null = null
+let resizeObs: ResizeObserver | null = null // kept for compatibility
 let threeRenderer: any = null
+let threeResizeHandler: (() => void) | null = null
 const mouse = { x: 0, y: 0 }
 
 function onMouse(e: MouseEvent) {
@@ -263,32 +264,34 @@ async function initThree(canvas: HTMLCanvasElement, W: number, H: number) {
   })
 
   // Handle resize
-  resizeObs = new ResizeObserver(() => {
-    const w = canvas.clientWidth, h = canvas.clientHeight
-    if (!w || !h) return
+  threeResizeHandler = () => {
+    const w = window.innerWidth, h = window.innerHeight
     renderer.setSize(w, h, false)
     camera.aspect = w / h
     camera.updateProjectionMatrix()
-  })
-  resizeObs.observe(canvas)
+  }
+  window.addEventListener('resize', threeResizeHandler, { passive: true })
 }
 
-onMounted(async () => {
+onMounted(() => {
   if (!import.meta.client) return
-  await nextTick()
-  const canvas = canvasRef.value!
-  const W = canvas.clientWidth  || window.innerWidth
-  const H = canvas.clientHeight || window.innerHeight
-  window.addEventListener('mousemove', onMouse, { passive: true })
-  initThree(canvas, W, H)
-  runEntrance()
-  initMagnetic()
+  // Use rAF to ensure browser layout is complete before reading dimensions
+  requestAnimationFrame(async () => {
+    const canvas = canvasRef.value!
+    if (!canvas) return
+    const W = window.innerWidth
+    const H = window.innerHeight
+    window.addEventListener('mousemove', onMouse, { passive: true })
+    initThree(canvas, W, H)
+    runEntrance()
+    initMagnetic()
+  })
 })
 
 onBeforeUnmount(() => {
   threeRenderer?.setAnimationLoop(null)
   threeRenderer?.dispose()
-  resizeObs?.disconnect()
+  if (threeResizeHandler) window.removeEventListener('resize', threeResizeHandler)
   window.removeEventListener('mousemove', onMouse)
 })
 </script>
