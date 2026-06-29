@@ -35,18 +35,6 @@
         </div>
       </div>
 
-      <!-- Newsletter -->
-      <div class="glass rounded-2xl p-6 mb-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div class="shrink-0">
-          <h4 class="font-semibold text-[var(--color-text-primary)] mb-1">Stay Updated</h4>
-          <p class="text-xs text-[var(--color-text-muted)]">Tech insights and company news in your inbox.</p>
-        </div>
-        <form class="flex gap-2 flex-1 min-w-0" @submit.prevent>
-          <input type="email" placeholder="Enter your email" class="form-input flex-1 min-w-0 py-2.5 text-sm" />
-          <button type="submit" class="btn-primary py-2.5 px-5 text-sm shrink-0">Subscribe</button>
-        </form>
-      </div>
-
       <!-- Bottom bar -->
       <div class="border-t border-[var(--color-border)] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
         <p class="text-xs text-[var(--color-text-muted)]">
