@@ -62,10 +62,10 @@ useScrollReveal()
 useTilt()
 
 const testimonials = [
-  { name: 'Reddy Construction', role: 'Local Guide', company: 'Google Review', industry: '⭐ Google', quote: 'Had a great experience with Ecomflex. They understood my requirements perfectly and built the website exactly as I wanted. Really happy with the quality and overall service. Highly recommended!' },
+  { name: 'Reddy Construction', role: 'Client', company: 'Google Review', industry: '⭐ Google', quote: 'Had a great experience with Ecomflex. They understood my requirements perfectly and built the website exactly as I wanted. Really happy with the quality and overall service. Highly recommended!' },
   { name: 'Vijay Ram Reddy', role: 'Client', company: 'Google Review', industry: '⭐ Google', quote: 'Working with Ecomflex was a wonderful experience. They listened to my requirements carefully and created the website just the way I wanted. I\'m really impressed with the quality and service. Definitely recommend them.' },
   { name: 'Keerthan Reddy', role: 'Client', company: 'Google Review', industry: '⭐ Google', quote: 'Very satisfied with the work done by Ecomflex. The team was easy to communicate with and delivered the website just as I had imagined. Smooth experience from start to finish. Thanks for the great work!' },
 ]
 
-const logos = ['RetailPro', 'EduTech', 'FinServe', 'HealthFirst', 'ManufactureX', 'LogiTrack', 'TechCorp', 'BuildNow']
+const logos = ['WeCool', 'Reddy Constructions', 'DailyMates', 'Vijay Innovation']
 </script>
