@@ -138,7 +138,7 @@ const submitting = ref(false)
 const submitted = ref(false)
 
 const contactInfo = [
-  { icon: Mail, label: 'Email', value: 'hello@ecomflex.com', href: 'mailto:hello@ecomflex.com' },
+  { icon: Mail, label: 'Email', value: 'support@ecomflex.in', href: 'mailto:support@ecomflex.in' },
   { icon: Phone, label: 'Phone', value: '+91 91486 25342', href: 'tel:+919148625342' },
   { icon: MessageCircle, label: 'WhatsApp', value: '+91 91486 25342', href: 'https://wa.me/919148625342' },
   { icon: MapPin, label: 'Office', value: 'Vidyaranyapur, Bangalore, Karnataka, India', href: null },
