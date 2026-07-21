@@ -8,9 +8,9 @@
 
     <!-- Corner glows -->
     <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full pointer-events-none"
-      style="background: radial-gradient(circle, rgba(37,99,235,0.14), transparent 70%)" />
+      style="background: radial-gradient(circle, rgb(var(--color-glow-1) / 0.14), transparent 70%)" />
     <div class="absolute -bottom-32 -right-32 w-96 h-96 rounded-full pointer-events-none"
-      style="background: radial-gradient(circle, rgba(245,158,11,0.10), transparent 70%)" />
+      style="background: radial-gradient(circle, rgb(var(--color-glow-2) / 0.10), transparent 70%)" />
 
     <div class="relative max-w-4xl mx-auto px-6 lg:px-8 text-center reveal-up">
 
@@ -49,7 +49,7 @@
       <!-- Feature chips -->
       <div class="flex flex-wrap justify-center gap-3">
         <div v-for="f in features" :key="f"
-          class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
+          class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium reveal-up"
           style="background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.18); color: rgba(255,255,255,0.55)">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           {{ f }}
@@ -61,8 +61,6 @@
 </template>
 
 <script setup lang="ts">
-useScrollReveal()
-
 const features = ['Free Consultation', 'No-Obligation Proposal', 'Transparent Pricing', 'Dedicated PM', 'Post-Launch Support', '99.9% Uptime SLA']
 </script>
 
@@ -73,8 +71,16 @@ const features = ['Free Consultation', 'No-Obligation Proposal', 'Transparent Pr
 .cta-glow {
   background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(37,99,235,0.18) 0%, transparent 65%);
 }
+:root[data-theme="light"] .cta-bg {
+  background: linear-gradient(135deg, #16233B 0%, #101B2D 50%, #0A1220 100%);
+}
+:root[data-theme="light"] .cta-glow {
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, rgb(var(--color-glow-3) / 0.16) 0%, transparent 65%);
+}
 .cta-heading { color: #ffffff; }
 .cta-sub     { color: rgba(255,255,255,0.52); }
 
-/* light-mode cta overrides live in main.css */
+/* Deliberate bold banner even in light theme — same "dark CTA band on a
+   light page" pattern premium sites use for a strong visual break; text
+   stays white, no light override needed. */
 </style>

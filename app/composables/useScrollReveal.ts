@@ -1,31 +1,45 @@
-export function useScrollReveal() {
-  if (!import.meta.client) return
+const SELECTOR = '.reveal-up, .reveal-left, .reveal-right, .reveal-scale, .reveal-fade'
 
-  const init = () => {
-    const elements = document.querySelectorAll(
-      '.reveal-up, .reveal-left, .reveal-right, .reveal-scale, .reveal-fade'
-    )
-    if (!elements.length) return
+let intersectionObserver: IntersectionObserver | null = null
+let mutationObserver: MutationObserver | null = null
+const observed = new WeakSet<Element>()
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('revealed')
-          } else {
-            entry.target.classList.remove('revealed')
-          }
-        })
-      },
-      { threshold: 0.07, rootMargin: '0px 0px -50px 0px' }
-    )
+function ensureObservers() {
+  if (intersectionObserver) return
 
-    elements.forEach((el) => observer.observe(el))
-    return observer
+  intersectionObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        entry.target.classList.toggle('revealed', entry.isIntersecting)
+      })
+    },
+    { threshold: 0.12, rootMargin: '0px 0px -60px 0px' }
+  )
+
+  const observeAll = () => {
+    document.querySelectorAll(SELECTOR).forEach((el) => {
+      if (!observed.has(el)) {
+        observed.add(el)
+        intersectionObserver!.observe(el)
+      }
+    })
   }
 
-  onMounted(() => {
-    const timer = setTimeout(init, 60)
-    onUnmounted(() => clearTimeout(timer))
-  })
+  observeAll()
+
+  // Catch late-mounted content for a few seconds, then stop —
+  // re-scanning the whole document on every DOM change (carousels,
+  // accordions, form transitions) is expensive and unnecessary once
+  // the page has settled.
+  mutationObserver = new MutationObserver(() => observeAll())
+  mutationObserver.observe(document.body, { childList: true, subtree: true })
+  setTimeout(() => {
+    mutationObserver?.disconnect()
+    mutationObserver = null
+  }, 4000)
+}
+
+export function useScrollReveal() {
+  if (!import.meta.client) return
+  onMounted(() => ensureObservers())
 }

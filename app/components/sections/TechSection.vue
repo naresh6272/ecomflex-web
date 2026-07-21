@@ -21,7 +21,7 @@
           </div>
           <div class="flex flex-wrap gap-3">
             <div v-for="tech in group.techs" :key="tech.name"
-              class="card px-4 py-3 flex items-center gap-2.5 hover:border-[var(--color-border-strong)] hover:shadow-md group cursor-default">
+              class="card px-4 py-3 flex items-center gap-2.5 hover:border-[var(--color-border-strong)] hover:shadow-md group cursor-default reveal-up">
               <div class="w-6 h-6 shrink-0 flex items-center justify-center" :class="tech.invert ? 'logo-invert' : ''">
                 <img :src="tech.logo" :alt="tech.name" class="w-6 h-6 object-contain" loading="lazy" />
               </div>
@@ -35,8 +35,6 @@
 </template>
 
 <script setup lang="ts">
-useScrollReveal()
-
 const DI = 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons'
 const SI = 'https://cdn.simpleicons.org'
 const CDN = 'https://cdn.jsdelivr.net/npm/simple-icons@v13/icons'

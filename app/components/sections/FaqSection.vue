@@ -34,7 +34,6 @@
 
 <script setup lang="ts">
 import { Plus as PlusIcon } from 'lucide-vue-next'
-useScrollReveal()
 
 const openIndex = ref<number | null>(0)
 

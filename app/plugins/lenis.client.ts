@@ -10,12 +10,21 @@ export default defineNuxtPlugin(() => {
     touchMultiplier: 2,
   })
 
+  let rafId = 0
   function raf(time: number) {
     lenis.raf(time)
-    requestAnimationFrame(raf)
+    rafId = requestAnimationFrame(raf)
   }
+  rafId = requestAnimationFrame(raf)
 
-  requestAnimationFrame(raf)
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      cancelAnimationFrame(rafId)
+      rafId = 0
+    } else if (!rafId) {
+      rafId = requestAnimationFrame(raf)
+    }
+  })
 
   // Intercept all hash anchor clicks and scroll via Lenis (bypasses router conflict)
   document.addEventListener('click', (e) => {
@@ -23,6 +32,10 @@ export default defineNuxtPlugin(() => {
     if (!anchor) return
     const hash = anchor.getAttribute('href')
     if (!hash || hash === '#') return
+
+    // #contact uses native instant jump (no scroll animation) — see scroll-margin-top in ContactSection.vue
+    if (hash === '#contact') return
+
     const target = document.querySelector(hash)
     if (!target) return
     e.preventDefault()

@@ -78,8 +78,6 @@ import {
   ShieldCheck, Rocket, LineChart, TrendingUp
 } from 'lucide-vue-next'
 
-useScrollReveal()
-
 const steps = [
   { phase: 1, icon: Search,      title: 'Discovery',        desc: 'Deep dive into your business goals, user needs, and technical requirements.',          duration: '1–3 days',   color: '#7B8CCC', bg: 'rgba(123,140,204,0.12)', border: 'rgba(123,140,204,0.22)' },
   { phase: 2, icon: Layers,      title: 'Architecture',     desc: 'System design, tech stack selection, database schema, and API planning.',              duration: '2–5 days',   color: '#4A85C8', bg: 'rgba(74,133,200,0.12)',  border: 'rgba(74,133,200,0.22)'  },

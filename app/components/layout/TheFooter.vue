@@ -49,14 +49,12 @@
 </template>
 
 <script setup lang="ts">
-import { Github, Linkedin, Instagram, Facebook, Twitter } from 'lucide-vue-next'
+import { Linkedin, Instagram, Facebook } from 'lucide-vue-next'
 
 const socials = [
-  { label: 'GitHub', href: '#', icon: Github },
-  { label: 'LinkedIn', href: '#', icon: Linkedin },
-  { label: 'Instagram', href: '#', icon: Instagram },
-  { label: 'Facebook', href: '#', icon: Facebook },
-  { label: 'Twitter', href: '#', icon: Twitter },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/ecom-flex-76157741b/', icon: Linkedin },
+  { label: 'Instagram', href: 'https://www.instagram.com/ecomflex247/', icon: Instagram },
+  { label: 'Facebook', href: 'https://www.facebook.com/share/194Eg9jyxz/', icon: Facebook },
 ]
 
 const footerLinks = [

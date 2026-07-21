@@ -18,9 +18,9 @@
         <div v-for="(item, i) in pillars" :key="item.title"
           class="card tilt-card p-8 reveal-scale"
           :class="`delay-${(i+1)*100}`">
-          <div class="w-14 h-14 rounded-2xl mb-6 flex items-center justify-center text-2xl font-bold"
+          <div class="icon-solid w-14 h-14 rounded-2xl mb-6 flex items-center justify-center"
             :style="{ background: item.bg }">
-            {{ item.icon }}
+            <component :is="item.icon" :size="24" class="text-white" />
           </div>
           <h3 class="text-xl font-bold text-[var(--color-text-primary)] mb-3">{{ item.title }}</h3>
           <p class="text-[var(--color-text-muted)] leading-relaxed text-sm">{{ item.body }}</p>
@@ -47,7 +47,7 @@
           </h3>
           <div class="space-y-4">
             <div v-for="value in values" :key="value.title"
-              class="flex items-start gap-4 p-4 rounded-2xl hover:bg-[var(--color-surface)] transition-colors group">
+              class="flex items-start gap-4 p-4 rounded-2xl hover:bg-[var(--color-surface)] transition-colors group reveal-up">
               <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1D4ED8] to-[#3B82F6] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-md">
                 <component :is="value.icon" :size="18" class="text-white" />
               </div>
@@ -65,10 +65,10 @@
             <!-- Main card -->
             <div class="glass-strong rounded-3xl p-8 relative overflow-hidden">
               <div class="absolute top-0 right-0 w-48 h-48 rounded-full pointer-events-none"
-                style="background: radial-gradient(circle, rgba(37,99,235,0.10), transparent); transform: translate(30%, -30%)" />
+                style="background: radial-gradient(circle, rgb(var(--color-glow-1) / 0.10), transparent); transform: translate(30%, -30%)" />
               <div class="space-y-5">
                 <div v-for="tech in techStack" :key="tech.name"
-                  class="flex items-center gap-4">
+                  class="flex items-center gap-4 reveal-up">
                   <div class="flex items-center gap-2 w-32 shrink-0">
                     <span class="text-lg">{{ tech.icon }}</span>
                     <span class="text-sm font-medium text-[var(--color-text-secondary)]">{{ tech.name }}</span>
@@ -99,9 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { Zap, ShieldCheck, Users, TrendingUp, Award, Clock } from 'lucide-vue-next'
-
-useScrollReveal()
+import { Zap, ShieldCheck, Users, TrendingUp, Award, Clock, Target, Sparkles, Lightbulb } from 'lucide-vue-next'
 
 const revealed = ref(false)
 const statsRowRef = ref<HTMLElement | null>(null)
@@ -142,28 +140,28 @@ onMounted(() => {
 
 const pillars = [
   {
-    icon: '🎯',
+    icon: Target,
     title: 'Our Mission',
     body: 'To empower businesses with technology that creates genuine value — software that is fast, reliable, and beautiful, built with care and precision.',
-    bg: 'linear-gradient(135deg, rgba(37,99,235,0.18), rgba(59,130,246,0.08))',
+    bg: 'linear-gradient(135deg, #1D4ED8, #2563EB)',
   },
   {
-    icon: '🌟',
+    icon: Sparkles,
     title: 'Our Vision',
     body: 'To be the most trusted technology partner for ambitious businesses across India and globally, known for craftsmanship, reliability and innovation.',
-    bg: 'linear-gradient(135deg, rgba(59,130,246,0.16), rgba(96,165,250,0.08))',
+    bg: 'linear-gradient(135deg, #2563EB, #3B82F6)',
   },
   {
-    icon: '💡',
+    icon: Lightbulb,
     title: 'Our Values',
     body: 'Quality over quantity. Transparency in every interaction. Continuous learning. Client success is our success — we measure ourselves by your outcomes.',
-    bg: 'linear-gradient(135deg, rgba(245,158,11,0.12), rgba(251,191,36,0.06))',
+    bg: 'linear-gradient(135deg, #0e2240, #1D4ED8)',
   },
 ]
 
 const statsData = [
-  { end: 50,  suffix: '+', label: 'Projects Delivered', sub: 'Across multiple countries' },
-  { end: 40,  suffix: '+', label: 'Happy Clients',       sub: '98% retention rate' },
+  { end: 20,  suffix: '+', label: 'Projects Delivered', sub: 'Across multiple countries' },
+  { end: 15,  suffix: '+', label: 'Happy Clients',       sub: '98% retention rate' },
   { end: 6,   suffix: '+', label: 'Years Experience',    sub: 'Since 2019' },
   { end: 15,  suffix: '+', label: 'Expert Team',         sub: 'Engineers & designers' },
 ]

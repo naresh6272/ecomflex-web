@@ -2,7 +2,7 @@
   <section id="testimonials" class="section-padding relative overflow-hidden bg-[var(--color-bg-alt)]">
     <!-- Animated background gradient -->
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] pointer-events-none opacity-20"
-      style="background: radial-gradient(ellipse, rgba(37,99,235,0.12), transparent 70%)" />
+      style="background: radial-gradient(ellipse, rgb(var(--color-glow-1) / 0.12), transparent 70%)" />
 
     <div class="relative max-w-7xl mx-auto px-6 lg:px-8">
       <div class="text-center mb-16">
@@ -58,13 +58,10 @@
 </template>
 
 <script setup lang="ts">
-useScrollReveal()
-useTilt()
-
 const testimonials = [
   { name: 'Reddy Construction', role: 'Client', company: 'Google Review', industry: '⭐ Google', quote: 'Had a great experience with Ecomflex. They understood my requirements perfectly and built the website exactly as I wanted. Really happy with the quality and overall service. Highly recommended!' },
-  { name: 'Vijay Ram Reddy', role: 'Client', company: 'Google Review', industry: '⭐ Google', quote: 'Working with Ecomflex was a wonderful experience. They listened to my requirements carefully and created the website just the way I wanted. I\'m really impressed with the quality and service. Definitely recommend them.' },
-  { name: 'Keerthan Reddy', role: 'Client', company: 'Google Review', industry: '⭐ Google', quote: 'Very satisfied with the work done by Ecomflex. The team was easy to communicate with and delivered the website just as I had imagined. Smooth experience from start to finish. Thanks for the great work!' },
+  { name: 'Vijay', role: 'Client', company: 'Google Review', industry: '⭐ Google', quote: 'Working with Ecomflex was a wonderful experience. They listened to my requirements carefully and created the website just the way I wanted. I\'m really impressed with the quality and service. Definitely recommend them.' },
+  { name: 'Keerthan', role: 'Client', company: 'Google Review', industry: '⭐ Google', quote: 'Very satisfied with the work done by Ecomflex. The team was easy to communicate with and delivered the website just as I had imagined. Smooth experience from start to finish. Thanks for the great work!' },
 ]
 
 const logos = ['WeCool', 'Reddy Constructions', 'DailyMates', 'Vijay Innovation']

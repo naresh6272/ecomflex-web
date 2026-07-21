@@ -4,7 +4,7 @@
       <div class="text-center mb-16">
         <div class="section-label mb-5 reveal-up">Industries</div>
         <h2 class="section-title mb-5 reveal-up delay-100">
-          19 Industries<br /><span class="text-gradient">We Serve</span>
+          Industries<br /><span class="text-gradient">We Serve</span>
         </h2>
         <p class="section-sub reveal-up delay-200">Deep domain expertise across the industries that matter most in today's digital economy.</p>
       </div>
@@ -45,7 +45,6 @@
 
 <script setup lang="ts">
 import { industries } from '~/data/industries'
-useScrollReveal()
 const activeId = ref<string | null>(null)
 </script>
 

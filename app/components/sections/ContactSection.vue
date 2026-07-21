@@ -1,10 +1,10 @@
 ﻿<template>
-  <section id="contact" class="section-padding relative overflow-hidden bg-[var(--color-bg-alt)]">
+  <section id="contact" style="padding-top:5rem;padding-bottom:5rem;scroll-margin-top:90px;" class="relative overflow-hidden bg-[var(--color-bg-alt)]">
     <div class="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full pointer-events-none opacity-10 animate-pulse-glow"
-      style="background: radial-gradient(circle, #2563EB, transparent)" />
+      style="background: radial-gradient(circle, rgb(var(--color-glow-1) / 1), transparent)" />
 
     <div class="relative max-w-7xl mx-auto px-6 lg:px-8">
-      <div class="max-w-3xl mx-auto text-center mb-16 reveal-up">
+      <div class="max-w-3xl mx-auto text-center mb-8">
         <div class="section-label mb-6">Get In Touch</div>
         <h2 class="section-title mb-5">
           Let's Build Something<br /><span class="text-gradient">Remarkable Together</span>
@@ -12,11 +12,11 @@
         <p class="section-sub">Tell us about your project. We'll get back within 24 hours with insights and a clear path forward.</p>
       </div>
 
-      <div class="grid lg:grid-cols-3 gap-8 reveal-up delay-200">
+      <div id="contact-form" class="grid lg:grid-cols-3 gap-8 reveal-up">
         <!-- Contact info -->
         <div class="space-y-4">
           <div v-for="info in contactInfo" :key="info.label"
-            class="card p-5 flex items-center gap-4 group hover:border-[var(--color-border-strong)] transition-colors">
+            class="card p-5 flex items-center gap-4 group hover:border-[var(--color-border-strong)] transition-colors reveal-up">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1D4ED8] to-[#3B82F6] flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
               <component :is="info.icon" :size="17" class="text-white" />
             </div>
@@ -51,7 +51,7 @@
         <!-- Form -->
         <div class="lg:col-span-2 glass-strong rounded-3xl p-7 sm:p-9 relative overflow-hidden">
           <div class="absolute top-0 right-0 w-64 h-64 pointer-events-none opacity-30"
-            style="background: radial-gradient(circle, rgba(37,99,235,0.10), transparent); transform: translate(30%, -30%)" />
+            style="background: radial-gradient(circle, rgb(var(--color-glow-1) / 0.10), transparent); transform: translate(30%, -30%)" />
 
           <h3 class="text-xl font-bold text-[var(--color-text-primary)] mb-7">Project Enquiry</h3>
 
@@ -129,8 +129,7 @@
 </template>
 
 <script setup lang="ts">
-import { Mail, Phone, MapPin, MessageCircle, Clock, Github, Linkedin, Instagram, Facebook, Twitter, Send as SendIcon, Loader as LoaderIcon, CheckCircle as CheckCircleIcon } from 'lucide-vue-next'
-useScrollReveal()
+import { Mail, Phone, MapPin, MessageCircle, Clock, Linkedin, Instagram, Facebook, Send as SendIcon, Loader as LoaderIcon, CheckCircle as CheckCircleIcon } from 'lucide-vue-next'
 
 const defaultForm = () => ({ name: '', company: '', email: '', phone: '', projectType: '', budget: '', description: '' })
 const form = ref(defaultForm())
@@ -141,15 +140,13 @@ const contactInfo = [
   { icon: Mail, label: 'Email', value: 'support@ecomflex.in', href: 'mailto:support@ecomflex.in' },
   { icon: Phone, label: 'Phone', value: '+91 91486 25342', href: 'tel:+919148625342' },
   { icon: MessageCircle, label: 'WhatsApp', value: '+91 91486 25342', href: 'https://wa.me/919148625342' },
-  { icon: MapPin, label: 'Office', value: 'Vidyaranyapur, Bangalore, Karnataka, India', href: null },
+  { icon: MapPin, label: 'Office', value: 'Lakshmipura Cross, Vaderahalli, K.G.Vaderahalli, Karnataka 560097', href: null },
 ]
 
 const socials = [
-  { label: 'GitHub', href: '#', icon: Github },
-  { label: 'LinkedIn', href: '#', icon: Linkedin },
-  { label: 'Instagram', href: '#', icon: Instagram },
-  { label: 'Facebook', href: '#', icon: Facebook },
-  { label: 'Twitter', href: '#', icon: Twitter },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/ecom-flex-76157741b/', icon: Linkedin },
+  { label: 'Instagram', href: 'https://www.instagram.com/ecomflex247/', icon: Instagram },
+  { label: 'Facebook', href: 'https://www.facebook.com/share/194Eg9jyxz/', icon: Facebook },
 ]
 
 const projectTypes = ['Business Website', 'Corporate Website', 'E-Commerce Platform', 'Custom Web Application', 'Enterprise Software', 'SaaS Platform', 'ERP / CRM System', 'AI / Automation', 'UI/UX Design', 'Cloud Deployment', 'Other']

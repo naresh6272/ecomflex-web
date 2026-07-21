@@ -31,6 +31,16 @@ onMounted(() => {
   }
   rafId = requestAnimationFrame(tick)
 
+  const onVisibility = () => {
+    if (document.hidden) {
+      cancelAnimationFrame(rafId)
+      rafId = 0
+    } else if (!rafId) {
+      rafId = requestAnimationFrame(tick)
+    }
+  }
+  document.addEventListener('visibilitychange', onVisibility)
+
   // Event delegation — one listener on document instead of thousands on elements
   const onEnter = (e: MouseEvent) => {
     const t = e.target as Element
@@ -56,6 +66,7 @@ onMounted(() => {
     window.removeEventListener('mousemove', moveDot)
     document.removeEventListener('mouseover',  onEnter)
     document.removeEventListener('mouseout',   onLeave)
+    document.removeEventListener('visibilitychange', onVisibility)
   })
 })
 </script>

@@ -68,30 +68,6 @@ const word2     = ref<HTMLElement | null>(null)
 const word3     = ref<HTMLElement | null>(null)
 const subRef    = ref<HTMLElement | null>(null)
 const ctaRef    = ref<HTMLElement | null>(null)
-const statsRef  = ref<HTMLElement | null>(null)
-
-const stats = [
-  { end: 50,  suffix: '+', label: 'Projects Delivered' },
-  { end: 40,  suffix: '+', label: 'Happy Clients' },
-  { end: 6,   suffix: '+', label: 'Years Experience' },
-  { end: 98,  suffix: '%', label: 'Satisfaction Rate' },
-]
-
-const statDisplays = ref(stats.map(() => '0'))
-
-function animateCountUp() {
-  stats.forEach((stat, i) => {
-    const duration = 1800
-    const start = performance.now()
-    const tick = (now: number) => {
-      const p = Math.min((now - start) / duration, 1)
-      const ease = 1 - Math.pow(1 - p, 3)
-      statDisplays.value[i] = Math.round(ease * stat.end) + stat.suffix
-      if (p < 1) requestAnimationFrame(tick)
-    }
-    requestAnimationFrame(tick)
-  })
-}
 
 let worker:    Worker | null     = null
 let resizeObs: ResizeObserver | null = null
@@ -127,8 +103,6 @@ async function runEntrance() {
     .to(word3.value,    { opacity: 1, y: 0, duration: 1.0 }, 0.75)
     .to(subRef.value,   { opacity: 1, y: 0, duration: 0.9 }, 1.05)
     .to(ctaRef.value,   { opacity: 1, y: 0, duration: 0.9 }, 1.20)
-    .to(statsRef.value, { opacity: 1, y: 0, duration: 0.9 }, 1.35)
-  animateCountUp()
 }
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────────
@@ -148,11 +122,22 @@ onMounted(async () => {
 
   // Transfer canvas control to worker — main thread can no longer touch it
   const offscreen = canvas.transferControlToOffscreen()
-  const dpr = Math.min(window.devicePixelRatio || 1, 2)
+  // Capped much lower than the actual device ratio — on a 2x/3x retina
+  // or phone screen this scene was rendering 4-9x the pixel count every
+  // frame with 20+ clearcoat-shaded PBR objects, which is a far bigger
+  // performance cost than object/draw-call count. 1.25 is still crisp
+  // for a decorative background graphic.
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.25)
   worker.postMessage({ type: 'init', canvas: offscreen, width: W, height: H, dpr }, [offscreen])
 
-  // Always dark
-  worker.postMessage({ type: 'theme', dark: true })
+  const { theme } = useColorTheme()
+  worker.postMessage({ type: 'theme', dark: theme.value !== 'light' })
+
+  const onThemeChange = (e: Event) => {
+    const t = (e as CustomEvent).detail
+    worker?.postMessage({ type: 'theme', dark: t !== 'light' })
+  }
+  window.addEventListener('ecomflex-theme-change', onThemeChange)
 
   // Load logo and send as ImageBitmap to worker
   fetch('/logo.png')
@@ -174,6 +159,28 @@ onMounted(async () => {
   window.addEventListener('mousemove', onMouse, { passive: true })
   runEntrance()
   initMagnetic()
+
+  // Pause the 3D render loop when the hero scrolls out of view or the tab
+  // is backgrounded — pure performance win, no visual/animation change.
+  const visibilityObs = new IntersectionObserver(
+    ([entry]) => {
+      worker?.postMessage({ type: entry.isIntersecting && !document.hidden ? 'resume' : 'pause' })
+    },
+    { threshold: 0 }
+  )
+  visibilityObs.observe(canvas)
+
+  const onVisibilityChange = () => {
+    const inView = canvas.getBoundingClientRect().bottom > 0 && canvas.getBoundingClientRect().top < window.innerHeight
+    worker?.postMessage({ type: !document.hidden && inView ? 'resume' : 'pause' })
+  }
+  document.addEventListener('visibilitychange', onVisibilityChange)
+
+  onBeforeUnmount(() => {
+    visibilityObs.disconnect()
+    document.removeEventListener('visibilitychange', onVisibilityChange)
+    window.removeEventListener('ecomflex-theme-change', onThemeChange)
+  })
 })
 
 onBeforeUnmount(() => {
@@ -185,30 +192,56 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* ── Hero background — deep midnight with blue gradient wash ── */
+/* ── Hero background — deep midnight with blue gradient wash (dark theme) ── */
 .hero-bg {
   background:
     radial-gradient(ellipse 90% 70% at 65% 40%, rgba(37,99,235,0.18) 0%, transparent 60%),
     radial-gradient(ellipse 60% 50% at 10% 80%, rgba(245,158,11,0.07) 0%, transparent 60%),
     #04080f;
 }
-/* hero-bg light override lives in main.css via #hero.hero-bg selector */
+/* Light theme — clean white hero (matches reference), canvas is
+   transparent (alpha:0 clear color set in hero.worker.ts) so this shows
+   through behind the 3D scene. */
+:root[data-theme="light"] .hero-bg {
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 35%, rgb(var(--color-glow-1) / 0.10), transparent 62%),
+    radial-gradient(ellipse 50% 40% at 10% 85%, rgb(var(--color-glow-2) / 0.07), transparent 62%),
+    #FFFFFF;
+}
 
-/* light-mode hero overrides live in main.css to avoid scoped specificity issues */
+:root[data-theme="light"] .hero-tag    { color: var(--color-text-secondary); }
+:root[data-theme="light"] .hero-h1     { color: #0F172A; }
+:root[data-theme="light"] .hero-sub    { color: #475569; }
+:root[data-theme="light"] .btn-ghost   { color: var(--color-text-secondary); border-color: var(--color-border); }
+:root[data-theme="light"] .btn-ghost:hover { border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-dim); }
+:root[data-theme="light"] .hero-stats  { border-top-color: var(--color-border); }
+:root[data-theme="light"] .stat-lbl    { color: var(--color-text-muted); }
+:root[data-theme="light"] .scroll-text { color: var(--color-text-faint); }
+:root[data-theme="light"] .scroll-pill { border-color: var(--color-border-strong); }
+:root[data-theme="light"] .tag-dot     { background: var(--color-primary); }
+:root[data-theme="light"] .scroll-dot  { background: var(--color-primary); }
+/* Only the 2 faint ring circles (#hero::before/::after in main.css)
+   remain for light theme — every other decorative shape (geo-wrap's 3
+   rings + diamond, all 3 orbs) is hidden so the sculpture sits against a
+   quiet backdrop instead of competing with extra shapes. */
+:root[data-theme="light"] .geo-wrap { display: none; }
+:root[data-theme="light"] .orb-1,
+:root[data-theme="light"] .orb-2,
+:root[data-theme="light"] .orb-3    { display: none; }
 
 /* ── Ambient orbs ── */
 .orb { position:absolute; border-radius:50%; pointer-events:none; z-index:1; }
 .orb-1 {
   width:700px; height:700px; top:-200px; left:35%;
-  background: radial-gradient(circle, rgba(37,99,235,0.14) 0%, transparent 70%);
+  background: radial-gradient(circle, rgb(var(--color-glow-1) / 0.14) 0%, transparent 70%);
 }
 .orb-2 {
   width:400px; height:400px; bottom:-60px; right:-80px;
-  background: radial-gradient(circle, rgba(37,99,235,0.07) 0%, transparent 70%);
+  background: radial-gradient(circle, rgb(var(--color-glow-1) / 0.07) 0%, transparent 70%);
 }
 .orb-3 {
   width:300px; height:300px; top:55%; left:-60px;
-  background: radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 70%);
+  background: radial-gradient(circle, rgb(var(--color-glow-2) / 0.07) 0%, transparent 70%);
 }
 
 /* ── CSS 3D orbital rings ── */
@@ -220,16 +253,16 @@ onBeforeUnmount(() => {
 
 .geo-ring {
   position:absolute; inset:0; border-radius:50%;
-  border:1px solid rgba(37,99,235,0.16);
+  border:1px solid rgb(var(--color-glow-1) / 0.16);
 }
-.geo-r1 { animation:ring-spin 26s linear infinite; box-shadow:0 0 28px rgba(37,99,235,0.06) inset; }
-.geo-r2 { inset:40px; border-color:rgba(245,158,11,0.14); animation:ring-spin 18s linear infinite reverse; }
-.geo-r3 { inset:90px; border-color:rgba(37,99,235,0.22); animation:ring-spin 12s linear infinite; box-shadow:0 0 16px rgba(37,99,235,0.10) inset; }
+.geo-r1 { animation:ring-spin 26s linear infinite; box-shadow:0 0 28px rgb(var(--color-glow-1) / 0.06) inset; }
+.geo-r2 { inset:40px; border-color:rgb(var(--color-glow-2) / 0.14); animation:ring-spin 18s linear infinite reverse; }
+.geo-r3 { inset:90px; border-color:rgb(var(--color-glow-1) / 0.22); animation:ring-spin 12s linear infinite; box-shadow:0 0 16px rgb(var(--color-glow-1) / 0.10) inset; }
 .geo-diamond {
   position:absolute; inset:130px;
-  background:rgba(37,99,235,0.03); border:1px solid rgba(37,99,235,0.22);
+  background:rgb(var(--color-glow-1) / 0.03); border:1px solid rgb(var(--color-glow-1) / 0.22);
   transform:rotate(45deg); animation:diamond-rot 22s linear infinite;
-  box-shadow:0 0 24px rgba(37,99,235,0.08) inset, 0 0 8px rgba(37,99,235,0.12);
+  box-shadow:0 0 24px rgb(var(--color-glow-1) / 0.08) inset, 0 0 8px rgb(var(--color-glow-1) / 0.12);
 }
 @keyframes ring-spin    { to { transform:rotateX(65deg) rotateZ(360deg); } }
 @keyframes diamond-rot  { to { transform:rotate(405deg); } }
@@ -258,6 +291,11 @@ onBeforeUnmount(() => {
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent; background-clip:text;
 }
+:root[data-theme="light"] .gradient-text {
+  background:linear-gradient(135deg,#1D4ED8 0%,#7C3AED 50%,#2563EB 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent; background-clip:text;
+}
 @keyframes grad-shift {
   0%,100% { background-position:0% 50%; }
   50%      { background-position:100% 50%; }
@@ -283,7 +321,7 @@ onBeforeUnmount(() => {
 [data-magnetic] { transition:transform 0.45s cubic-bezier(.22,1,.36,1) !important; }
 .hero-stats {
   display:grid; grid-template-columns:repeat(4,1fr);
-  padding-top:2.5rem; border-top:1px solid rgba(37,99,235,0.12);
+  padding-top:2.5rem; border-top:1px solid rgba(255,255,255,0.12);
   will-change:transform,opacity;
 }
 @media (max-width:640px) { .hero-stats { grid-template-columns:repeat(2,1fr); gap:1.5rem 0; } }
@@ -291,6 +329,10 @@ onBeforeUnmount(() => {
 .stat-val {
   font-size:clamp(1.9rem,3.2vw,2.75rem); font-weight:800; letter-spacing:-0.03em;
   background:linear-gradient(135deg,#1D4ED8,#2563EB,#f59e0b);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+:root[data-theme="light"] .stat-val {
+  background:linear-gradient(135deg,#4B3A7A,#6B57A6,#C9A227);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
 }
 .stat-lbl { font-size:.8rem; color:rgba(255,255,255,0.32); letter-spacing:.02em; }

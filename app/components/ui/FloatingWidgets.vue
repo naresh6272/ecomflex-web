@@ -58,11 +58,17 @@ const circumference = 2 * Math.PI * 20
 const dashOffset = computed(() => circumference - (progress.value / 100) * circumference)
 
 onMounted(() => {
+  let rafPending = false
   const onScroll = () => {
-    const scrollTop = window.scrollY
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight
-    progress.value = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
-    showBackTop.value = scrollTop > 400
+    if (rafPending) return
+    rafPending = true
+    requestAnimationFrame(() => {
+      rafPending = false
+      const scrollTop = window.scrollY
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight
+      progress.value = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
+      showBackTop.value = scrollTop > 400
+    })
   }
   window.addEventListener('scroll', onScroll, { passive: true })
   onUnmounted(() => window.removeEventListener('scroll', onScroll))

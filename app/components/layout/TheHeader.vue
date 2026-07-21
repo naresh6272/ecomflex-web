@@ -3,12 +3,12 @@
     class="fixed top-0 inset-x-0 z-50 transition-all duration-500"
     :class="scrolled ? 'header-scrolled' : 'header-top'"
   >
-    <div class="max-w-7xl mx-auto px-6 lg:px-10">
-      <div class="flex items-center justify-between h-16 lg:h-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
+      <div class="flex items-center justify-between h-14 sm:h-16 lg:h-20">
 
         <!-- Logo -->
-        <a href="#" class="flex items-center shrink-0">
-          <img src="/logo.png" alt="Logo" class="h-10 w-auto object-contain logo-img" />
+        <a href="#" class="flex items-center shrink-0 min-w-0">
+          <img src="/logo.png" alt="Logo" class="h-8 sm:h-10 w-auto object-contain logo-img" />
         </a>
 
         <!-- Desktop Nav -->
@@ -19,8 +19,17 @@
         </nav>
 
         <!-- Right actions -->
-        <div class="flex items-center gap-3">
-          <a href="#contact" class="hidden sm:inline-flex btn-primary py-2.5 px-6 text-sm font-semibold">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <button @click="toggle" class="theme-btn" aria-label="Toggle light/dark theme">
+            <SunIcon v-if="theme === 'dark'" :size="18" />
+            <MoonIcon v-else :size="18" />
+          </button>
+
+          <!-- Hidden until md (768px): at the sm (640px) breakpoint there
+               wasn't enough room for logo + theme toggle + this button +
+               hamburger together, causing cramped/overlapping mobile-view
+               header on phones in landscape and small tablets. -->
+          <a href="#contact" class="hidden md:inline-flex btn-primary py-2.5 px-5 lg:px-6 text-sm font-semibold whitespace-nowrap">
             <span>Let's Talk</span>
             <ArrowRightIcon :size="14" />
           </a>
@@ -54,7 +63,9 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowRight as ArrowRightIcon, Menu as MenuIcon, X as XIcon } from 'lucide-vue-next'
+import { ArrowRight as ArrowRightIcon, Menu as MenuIcon, X as XIcon, Sun as SunIcon, Moon as MoonIcon } from 'lucide-vue-next'
+
+const { theme, toggle } = useColorTheme()
 
 const scrolled = ref(false)
 const menuOpen = ref(false)
@@ -80,10 +91,11 @@ onMounted(() => {
   border-bottom: 1px solid transparent;
 }
 .header-scrolled {
-  background: rgba(2, 1, 4, 0.95);
+  background: var(--color-header-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 34, 0, 0.12);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .logo-img {
@@ -113,7 +125,7 @@ onMounted(() => {
 .nav-link:hover::after { width: 100%; }
 
 .mobile-menu {
-  background: rgba(2, 1, 4, 0.97);
+  background: var(--color-header-menu-bg);
   backdrop-filter: blur(20px);
 }
 
@@ -122,12 +134,12 @@ onMounted(() => {
   padding: 0.875rem 0.5rem;
   font-size: 1.0625rem;
   font-weight: 500;
-  color: var(--header-nav-color);
+  color: var(--color-text-secondary);
   text-decoration: none;
   border-bottom: 1px solid var(--color-border);
   transition: color 0.2s ease;
 }
-.mobile-link:hover { color: var(--header-nav-hover); }
+.mobile-link:hover { color: var(--color-text-primary); }
 
 
 .slide-down-enter-active,

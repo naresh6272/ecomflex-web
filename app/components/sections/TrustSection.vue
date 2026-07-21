@@ -68,9 +68,6 @@
 <script setup lang="ts">
 import { X as XIcon, FileText, Building2, Receipt, CreditCard, DollarSign, Users, CheckCircle } from 'lucide-vue-next'
 
-useScrollReveal()
-useTilt()
-
 onUnmounted(() => { document.body.style.overflow = '' })
 
 const activeCert = ref<any>(null)

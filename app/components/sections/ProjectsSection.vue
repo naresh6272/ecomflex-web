@@ -81,8 +81,6 @@
 </template>
 
 <script setup lang="ts">
-useScrollReveal()
-
 const activeTab = ref('All')
 
 const projects = [

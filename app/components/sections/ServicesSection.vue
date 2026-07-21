@@ -1,6 +1,6 @@
 ﻿<template>
   <section id="services" class="section-padding relative overflow-hidden bg-[var(--color-bg)]">
-    <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse 80% 40% at 50% 0%,rgba(37,99,235,0.09),transparent 65%)" />
+    <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse 80% 40% at 50% 0%,rgb(var(--color-glow-1) / 0.09),transparent 65%)" />
     <div class="relative max-w-7xl mx-auto px-6 lg:px-8">
       <div class="text-center mb-12">
         <div class="section-label mb-5 reveal-up">What We Build</div>
@@ -17,10 +17,10 @@
         <button
           v-for="cat in categories" :key="cat"
           @click="activeCategory = cat"
-          class="px-4 py-2 rounded-full text-sm font-semibold transition-all"
+          class="px-4 py-2 rounded-full text-sm font-semibold transition-all border-2"
           :class="activeCategory === cat
-            ? 'bg-gradient-to-r from-[#1D4ED8] to-[#3B82F6] text-white shadow-lg shadow-[rgba(37,99,235,0.30)]'
-            : 'border border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[rgba(37,99,235,0.4)] hover:text-[#3B82F6]'">
+            ? 'bg-gradient-to-r from-[#1D4ED8] to-[#3B82F6] text-white shadow-lg shadow-[rgba(37,99,235,0.30)] border-transparent'
+            : 'border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary-dim)]'">
           {{ cat === 'All' ? '✦ All' : cat }}
         </button>
       </div>
@@ -59,7 +59,6 @@
 
 <script setup lang="ts">
 import { services } from '~/data/services'
-useScrollReveal()
 
 const categoryColors: Record<string, string> = {
   'Website Development': 'linear-gradient(135deg, #1D4ED8, #2563EB)',
