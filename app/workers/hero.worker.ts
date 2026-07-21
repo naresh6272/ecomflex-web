@@ -284,15 +284,18 @@ function buildLightSculpture() {
   // Edge frames use a single InstancedMesh (1 draw call for all 8
   // instead of 8 separate meshes) — this plus the rod instancing below
   // is the actual fix for the lag: draw-call count, not object count.
+  // Plates are arranged in a ring at 9-13 units from centre so none of them
+  // overlap the coin (effective radius ~3.7 units). The orbital arcs (r=12,16)
+  // wrap the outer boundary, giving: coin → clear gap → plates → arcs.
   const plateSpecs = [
-    { w: 6,  h: 4.2, x: 4.6,  y: 3,    z: 2.6,  rx: 0.4,  ry: 0.6,  rz: 0.1,  hero: true },
-    { w: 4.2,h: 6,   x: -4.6, y: -2.2, z: -4.4, rx: -0.3, ry: 1.1,  rz: 0.5,  hero: true },
-    { w: 4.6,h: 3.1, x: 2.8,  y: -4.8, z: 4.4,  rx: 0.8,  ry: -0.4, rz: -0.2, hero: false },
-    { w: 3.5,h: 3.5, x: -5,   y: 4,    z: 1.8,  rx: 0.2,  ry: -0.9, rz: 0.3,  hero: false },
-    { w: 3.8,h: 5.4, x: 5.6,  y: -0.8, z: -2.6, rx: -0.5, ry: 0.3,  rz: -0.4, hero: false },
-    { w: 5,  h: 3.3, x: -1.8, y: -5.6, z: -1.8, rx: 0.6,  ry: -1.2, rz: 0.2,  hero: false },
-    { w: 3.1,h: 4.3, x: 3.4,  y: 5.4,  z: -4.8, rx: 0.3,  ry: -0.6, rz: 0.15, hero: false },
-    { w: 4.3,h: 2.9, x: -3.4, y: 0.2,  z: 3.6,  rx: -0.7, ry: 0.5,  rz: -0.3, hero: false },
+    { w: 6,  h: 4.2, x: 7.5,  y: 6.5,  z: 2.6,  rx: 0.4,  ry: 0.6,  rz: 0.1,  hero: true  }, // top-right
+    { w: 4.2,h: 6,   x: 11.5, y: 0.5,  z: -3.0, rx: -0.3, ry: 1.1,  rz: 0.5,  hero: true  }, // right
+    { w: 4.6,h: 3.1, x: 7.0,  y: -8.0, z: 4.4,  rx: 0.8,  ry: -0.4, rz: -0.2, hero: false }, // bottom-right
+    { w: 3.5,h: 3.5, x: 0.5,  y: -10,  z: 1.8,  rx: 0.2,  ry: -0.9, rz: 0.3,  hero: false }, // bottom
+    { w: 3.8,h: 5.4, x: -8.5, y: -7.0, z: -2.6, rx: -0.5, ry: 0.3,  rz: -0.4, hero: false }, // bottom-left
+    { w: 5,  h: 3.3, x: -11,  y: 0.5,  z: -1.8, rx: 0.6,  ry: -1.2, rz: 0.2,  hero: false }, // left
+    { w: 3.1,h: 4.3, x: -7.0, y: 7.5,  z: -4.8, rx: 0.3,  ry: -0.6, rz: 0.15, hero: false }, // top-left
+    { w: 4.3,h: 2.9, x: 0.5,  y: 9.5,  z: 3.6,  rx: -0.7, ry: 0.5,  rz: -0.3, hero: false }, // top
   ]
   const edgeUnitGeo = new THREE.PlaneGeometry(1, 1)
   const edgeInstances = new THREE.InstancedMesh(edgeUnitGeo, edgeMat, plateSpecs.length)
@@ -356,7 +359,7 @@ function buildLightSculpture() {
     // Tight shell close around the coin — no long reach toward the text.
     const theta = Math.random() * Math.PI * 2
     const phi = Math.acos(2 * Math.random() - 1)
-    const r = 6 + Math.random() * 5
+    const r = 8 + Math.random() * 4
     const p = new THREE.Vector3(
       r * Math.sin(phi) * Math.cos(theta),
       r * Math.sin(phi) * Math.sin(theta) * 0.7,
