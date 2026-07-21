@@ -289,7 +289,7 @@ onBeforeUnmount(() => {
 }
 .hero-word { display:inline-block; will-change:transform,opacity; }
 .gradient-text {
-  background: linear-gradient(120deg, #60A5FA, #A78BFA, #F59E0B, #60A5FA, #A78BFA);
+  background: linear-gradient(120deg, #D4AF37, #800020, #F5C842, #800020, #D4AF37);
   background-size: 260% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -297,7 +297,7 @@ onBeforeUnmount(() => {
   animation: grad-shift 4s linear infinite;
 }
 :root[data-theme="light"] .gradient-text {
-  background: linear-gradient(120deg, #2563EB, #7C3AED, #D97706, #2563EB, #7C3AED);
+  background: linear-gradient(120deg, #D4AF37, #800020, #F5C842, #800020, #D4AF37);
   background-size: 260% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
