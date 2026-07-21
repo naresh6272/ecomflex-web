@@ -101,18 +101,25 @@ html, body { background: var(--color-bg); }
   --color-glow-3: 124 58 237;   /* violet accent  */
 }
 
-/* ── Light-theme section backgrounds: pure white sections with blue glow
-   alternate with cool blue-tinted (#F4F7FF) sections — clearly distinct,
-   no warm/cream tint. ── */
+/* ── Light-theme section backgrounds ──────────────────────────────────────
+   Each section gets:
+   1. A dot grid (blue 1px dots, 28px apart) for texture
+   2. Two large radial glow orbs (blue + amber) for depth
+   3. A very slightly-transparent base colour so the fixed GradientBackground
+      bleeds through, adding the animated depth layer.
+   White sections and blue-tinted alt sections alternate to give clear rhythm.
+   ───────────────────────────────────────────────────────────────────────── */
 :root[data-theme="light"] #faq,
 :root[data-theme="light"] #technologies,
 :root[data-theme="light"] #why-choose,
 :root[data-theme="light"] #trust,
 :root[data-theme="light"] #services {
   background:
-    radial-gradient(ellipse 60% 50% at 5% 0%,    rgb(var(--color-glow-1) / 0.08), transparent 65%),
-    radial-gradient(ellipse 50% 40% at 98% 100%, rgb(var(--color-glow-2) / 0.07), transparent 65%),
-    #FFFFFF;
+    radial-gradient(circle, rgba(37,99,235,0.055) 1px, transparent 1px),
+    radial-gradient(ellipse 65% 55% at 4% 0%,    rgb(var(--color-glow-1) / 0.11), transparent 65%),
+    radial-gradient(ellipse 55% 45% at 98% 100%, rgb(var(--color-glow-2) / 0.09), transparent 65%),
+    rgba(255, 255, 255, 0.96);
+  background-size: 28px 28px, 100% 100%, 100% 100%, 100% 100%;
 }
 :root[data-theme="light"] #about,
 :root[data-theme="light"] #projects,
@@ -121,9 +128,11 @@ html, body { background: var(--color-bg); }
 :root[data-theme="light"] #testimonials,
 :root[data-theme="light"] #contact {
   background:
-    radial-gradient(ellipse 60% 50% at 98% 5%,   rgb(var(--color-glow-2) / 0.07), transparent 65%),
-    radial-gradient(ellipse 50% 40% at 2% 100%,  rgb(var(--color-glow-1) / 0.08), transparent 65%),
-    var(--color-bg-alt);
+    radial-gradient(circle, rgba(37,99,235,0.055) 1px, transparent 1px),
+    radial-gradient(ellipse 65% 55% at 98% 2%,   rgb(var(--color-glow-2) / 0.09), transparent 65%),
+    radial-gradient(ellipse 55% 45% at 2% 100%,  rgb(var(--color-glow-1) / 0.11), transparent 65%),
+    rgba(244, 247, 255, 0.96);
+  background-size: 28px 28px, 100% 100%, 100% 100%, 100% 100%;
 }
 
 /* ── Layered geometric design elements — real ring/shape layers sitting

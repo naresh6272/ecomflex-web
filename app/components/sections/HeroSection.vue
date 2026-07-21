@@ -17,9 +17,6 @@
     <div class="orb orb-2" />
     <div class="orb orb-3" />
 
-    <!-- Illustrated characters -->
-    <FloatingDoodles />
-
     <!-- ── CONTENT ── -->
     <div class="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-12 pt-36 pb-28">
       <div class="max-w-4xl">
@@ -207,9 +204,11 @@ onBeforeUnmount(() => {
    through behind the 3D scene. */
 :root[data-theme="light"] .hero-bg {
   background:
+    radial-gradient(circle, rgba(37,99,235,0.055) 1px, transparent 1px),
     radial-gradient(ellipse 60% 50% at 80% 35%, rgb(var(--color-glow-1) / 0.10), transparent 62%),
     radial-gradient(ellipse 50% 40% at 10% 85%, rgb(var(--color-glow-2) / 0.07), transparent 62%),
-    #FFFFFF;
+    rgba(255, 255, 255, 0.92);
+  background-size: 28px 28px, 100% 100%, 100% 100%, 100% 100%;
 }
 
 :root[data-theme="light"] .hero-tag    { color: var(--color-text-secondary); }

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <GradientBackground />
     <NuxtRouteAnnouncer />
     <NuxtPage />
     <FloatingWidgets />
