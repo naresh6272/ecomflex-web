@@ -289,20 +289,20 @@ onBeforeUnmount(() => {
 }
 .hero-word { display:inline-block; will-change:transform,opacity; }
 .gradient-text {
-  background: linear-gradient(120deg, #06b6d4, #f59e0b, #a855f7, #3b82f6, #10b981, #f59e0b, #06b6d4);
-  background-size: 280% 100%;
+  background: linear-gradient(120deg, #60A5FA, #A78BFA, #F59E0B, #60A5FA, #A78BFA);
+  background-size: 260% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: grad-shift 5s linear infinite;
+  animation: grad-shift 4s linear infinite;
 }
 :root[data-theme="light"] .gradient-text {
-  background: linear-gradient(120deg, #D97706, #7C3AED, #2563EB, #059669, #D97706, #7C3AED, #D97706);
-  background-size: 280% 100%;
+  background: linear-gradient(120deg, #2563EB, #7C3AED, #D97706, #2563EB, #7C3AED);
+  background-size: 260% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: grad-shift 5s linear infinite;
+  animation: grad-shift 4s linear infinite;
 }
 @keyframes grad-shift {
   0%   { background-position: 0% 50%; }
