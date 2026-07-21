@@ -19,7 +19,7 @@
           @click="activeCategory = cat"
           class="px-4 py-2 rounded-full text-sm font-semibold transition-all border-2"
           :class="activeCategory === cat
-            ? 'bg-gradient-to-r from-[#1D4ED8] to-[#3B82F6] text-white shadow-lg shadow-[rgba(37,99,235,0.30)] border-transparent'
+            ? 'bg-gradient-to-r from-[#1D4ED8] to-[#3B82F6] text-white border-transparent'
             : 'border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary-dim)]'">
           {{ cat === 'All' ? '✦ All' : cat }}
         </button>

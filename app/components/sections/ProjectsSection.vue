@@ -15,7 +15,7 @@
           @click="activeTab = tab"
           class="px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200"
           :class="activeTab === tab
-            ? 'bg-[var(--color-primary)] text-white shadow-lg'
+            ? 'bg-[var(--color-primary)] text-white'
             : 'border border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]'">
           {{ tab }}
         </button>

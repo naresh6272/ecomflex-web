@@ -379,10 +379,9 @@ body {
   background:linear-gradient(100deg,#101B2D 0%,#101B2D 55%,#C9A227 100%);
   background-size:100% 100%;
   animation:none;
-  box-shadow: 0 8px 24px rgb(var(--color-glow-2) / 0.28), 0 2px 8px rgb(var(--color-glow-1) / 0.20);
 }
 :root[data-theme="light"] .btn-primary:hover {
-  box-shadow: 0 12px 32px rgb(var(--color-glow-2) / 0.34), 0 4px 12px rgb(var(--color-glow-1) / 0.26);
+  box-shadow: none;
 }
 .btn-primary:active { transform:translateY(0); }
 
@@ -577,6 +576,15 @@ body {
 
 @media (max-width: 768px) {
   .section-sub { white-space: normal !important; }
+
+  /* Custom mouse cursor is meaningless on touch screens */
+  .cursor-dot, .cursor-ring { display: none !important; }
+
+  /* Section headings: tighten up on small screens */
+  .section-title { font-size: clamp(1.9rem, 8vw, 2.8rem); }
+
+  /* Reduce section vertical padding so content breathes without wasted space */
+  .section-padding { padding: 4rem 0; }
 }
 
 /* ==============================================

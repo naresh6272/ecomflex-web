@@ -18,7 +18,7 @@
     <div class="orb orb-3" />
 
     <!-- ── CONTENT ── -->
-    <div class="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-12 pt-36 pb-28">
+    <div class="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-12 pt-24 lg:pt-36 pb-16 lg:pb-28">
       <div class="max-w-4xl">
 
         <div ref="tagRef" class="hero-tag" style="opacity:0;transform:translateY(20px)">
@@ -109,6 +109,14 @@ async function runEntrance() {
 onMounted(async () => {
   if (!import.meta.client) return
   await nextTick()
+
+  // Mobile: skip the 3D worker entirely — canvas is hidden via CSS and the
+  // WebGL render loop would just drain battery for nothing visible.
+  if (window.innerWidth < 768) {
+    runEntrance()
+    initMagnetic()
+    return
+  }
 
   const canvas = canvasRef.value!
   const W = canvas.clientWidth  || window.innerWidth
@@ -288,14 +296,12 @@ onBeforeUnmount(() => {
   line-height:1.0; letter-spacing:-0.04em; color:#ffffff; margin:0 0 2.2rem;
 }
 .hero-word { display:inline-block; will-change:transform,opacity; }
+/* Dark mode: plain white — matches the rest of the hero heading */
 .gradient-text {
-  background: linear-gradient(120deg, #D4AF37, #800020, #F5C842, #800020, #D4AF37);
-  background-size: 260% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: grad-shift 4s linear infinite;
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
 }
+/* Light mode only: flowing gold → maroon gradient */
 :root[data-theme="light"] .gradient-text {
   background: linear-gradient(120deg, #D4AF37, #800020, #F5C842, #800020, #D4AF37);
   background-size: 260% 100%;
@@ -364,5 +370,23 @@ onBeforeUnmount(() => {
 .scroll-text {
   font-size:8px; font-weight:700; letter-spacing:.22em;
   text-transform:uppercase; color:rgba(255,255,255,0.18);
+}
+
+/* ── Mobile (≤767px): no 3D canvas, centered layout ─────────────── */
+@media (max-width: 767px) {
+  /* Hide canvas — worker is also skipped in onMounted */
+  canvas { display: none !important; }
+
+  /* Ambient orbs waste GPU compositing on mobile with no canvas to complement */
+  .orb-1, .orb-2, .orb-3 { display: none; }
+
+  /* Center all hero text */
+  .hero-tag  { display: flex; justify-content: center; }
+  .hero-h1   { text-align: center; font-size: clamp(2.6rem, 10.5vw, 3.5rem); }
+  .hero-sub  { text-align: center; margin-left: auto; margin-right: auto; max-width: 36ch; }
+  .hero-ctas { justify-content: center; }
+
+  /* Scroll cue overlaps content on short mobile screens */
+  .scroll-cue { display: none; }
 }
 </style>
