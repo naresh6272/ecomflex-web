@@ -17,6 +17,9 @@
     <div class="orb orb-2" />
     <div class="orb orb-3" />
 
+    <!-- Illustrated characters -->
+    <FloatingDoodles />
+
     <!-- ── CONTENT ── -->
     <div class="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-12 pt-36 pb-28">
       <div class="max-w-4xl">
