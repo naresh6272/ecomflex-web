@@ -12,9 +12,9 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 // from emissive materials + tone mapping only (see buildLightSculpture).
 
 // ── Constants ──────────────────────────────────────────────────────────────
-const NODE_COUNT   = 23
-const MAX_LINES    = 85
-const PACKET_COUNT = 16
+const NODE_COUNT   = 14
+const MAX_LINES    = 48
+const PACKET_COUNT = 8
 const MAX_DIST_SQ  = 16 * 16
 const ACCENT  = 0x06b6d4   // electric cyan
 const ACCENT2 = 0xf59e0b   // warm gold
@@ -260,19 +260,19 @@ function buildLightSculpture() {
   group.scale.setScalar(0.80)
   group.visible = false
 
-  const goldMat = () => new THREE.MeshPhysicalMaterial({
-    color: 0xD4AF37, metalness: 1, roughness: 0.30,
-    clearcoat: 1, clearcoatRoughness: 0.15,
-    emissive: 0x3D2C05, emissiveIntensity: 0.04,
+  // MeshStandardMaterial — no clearcoat, ~2× cheaper per fragment than
+  // MeshPhysicalMaterial. Visual quality is almost identical for small
+  // decorative objects; clearcoat was the single largest GPU cost.
+  const goldMat = () => new THREE.MeshStandardMaterial({
+    color: 0xD4AF37, metalness: 0.95, roughness: 0.28,
+    emissive: 0x3D2C05, emissiveIntensity: 0.06,
   })
-  const glassMat = () => new THREE.MeshPhysicalMaterial({
-    color: 0xF5EAC8, roughness: 0.04,
-    metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.03,
+  const glassMat = () => new THREE.MeshStandardMaterial({
+    color: 0xF5EAC8, roughness: 0.10, metalness: 0.05,
     transparent: true, opacity: 0.58, side: THREE.DoubleSide,
   })
-  const glassMatHero = () => new THREE.MeshPhysicalMaterial({
-    color: 0xFAF0D0, roughness: 0.03,
-    metalness: 0.08, clearcoat: 1, clearcoatRoughness: 0.02,
+  const glassMatHero = () => new THREE.MeshStandardMaterial({
+    color: 0xFAF0D0, roughness: 0.08, metalness: 0.08,
     transparent: true, opacity: 0.68, side: THREE.DoubleSide,
   })
   const edgeMat = new THREE.MeshBasicMaterial({ color: 0xD4AF37, transparent: true, opacity: 0.80 })
@@ -330,7 +330,7 @@ function buildLightSculpture() {
   ]
   for (const s of arcSpecs) {
     const arc = new THREE.Mesh(
-      new THREE.TorusGeometry(s.r, s.tube, 8, 28, s.arc),
+      new THREE.TorusGeometry(s.r, s.tube, 6, 18, s.arc),
       s.faint
         ? new THREE.MeshPhysicalMaterial({ color: 0xD4AF37, metalness: 1, roughness: 0.4, clearcoat: 1, transparent: true, opacity: 0.35 })
         : goldMat(),
@@ -352,7 +352,7 @@ function buildLightSculpture() {
   })
   const JOINT_COUNT = 7
   const joints: THREE.Vector3[] = []
-  const jointInstances = new THREE.InstancedMesh(new THREE.SphereGeometry(0.26, 8, 8), jointMat, JOINT_COUNT)
+  const jointInstances = new THREE.InstancedMesh(new THREE.SphereGeometry(0.26, 6, 6), jointMat, JOINT_COUNT)
   const dummyM = new THREE.Object3D()
   for (let i = 0; i < JOINT_COUNT; i++) {
     // Tight shell close around the coin — no long reach toward the text.
@@ -519,102 +519,86 @@ function buildLightSculpture() {
 function animate() {
   frameCount++
 
-  // Move nodes + bounce
-  for (let i = 0; i < NODE_COUNT; i++) {
-    const p = nodesMeshes[i].position
-    const v = nodeVelocities[i]
-    p.addScaledVector(v, 1)
-    // Bounce off the outer field edges, and deflect out of the heading-text
-    // and 3D-sphere keep-out zones if the drift carries a node into either.
-    if (p.x < FIELD_X_MIN || p.x > FIELD_X_MAX) v.x *= -1
-    if (p.y < FIELD_Y_MIN || p.y > FIELD_Y_MAX) v.y *= -1
-    if (Math.abs(p.z) > 17) v.z *= -1
-    if (inTextZone(p.x, p.y)) { v.x = Math.abs(v.x); v.y = -Math.abs(v.y) }
-    if (inIcoZone(p.x, p.y)) {
-      const dx = p.x - ICO_CX, dy = p.y - ICO_CY
-      const len = Math.hypot(dx, dy) || 1
-      v.x = (dx / len) * Math.abs(v.x || 0.01)
-      v.y = (dy / len) * Math.abs(v.y || 0.01)
-    }
-    // Gentle per-node pulse so the dots feel alive, not just drifting
-    const s = 1 + Math.sin(frameCount * 0.06 + i * 0.7) * 0.22
-    nodesMeshes[i].scale.setScalar(s)
-  }
-
-  // Update connections every 2nd frame — nodes now move faster, so
-  // recomputing more often keeps the connect/disconnect "web" effect
-  // reading as fluid rather than jumpy, while still saving half the cost.
-  if (frameCount % 2 === 0) {
-    let cc = 0
-    for (let i = 0; i < NODE_COUNT && cc < MAX_LINES; i++) {
-      const pi = nodesMeshes[i].position
-      for (let j = i + 1; j < NODE_COUNT && cc < MAX_LINES; j++) {
-        const pj = nodesMeshes[j].position
-        const dx = pi.x - pj.x, dy = pi.y - pj.y, dz = pi.z - pj.z
-        const d2 = dx * dx + dy * dy + dz * dz
-        if (d2 < MAX_DIST_SQ) {
-          const a = (1 - d2 / MAX_DIST_SQ) * 0.75
-          const idx = cc * 6
-          linePositions[idx]   = pi.x; linePositions[idx+1] = pi.y; linePositions[idx+2] = pi.z
-          linePositions[idx+3] = pj.x; linePositions[idx+4] = pj.y; linePositions[idx+5] = pj.z
-          const lr = lightMode ? a * 0.48 : a * 0.08
-          const lg = lightMode ? a * 0.34 : a * 0.88
-          const lb = lightMode ? a * 0.07 : a * 1.00
-          lineColors[idx]   = lr; lineColors[idx+1] = lg; lineColors[idx+2] = lb
-          lineColors[idx+3] = lr; lineColors[idx+4] = lg; lineColors[idx+5] = lb
-          cc++
+  if (lightMode) {
+    // ── Light mode: only run sculpture + coin logic ──────────────────────────
+    // Node / line / packet systems are all invisible in light mode — skip
+    // their CPU work entirely (was the biggest main-thread cost).
+    if (lightSculptureGroup) {
+      // Spin every 2nd frame — halves the JS work, motion is imperceptible at 30 updates/s
+      if (frameCount % 2 === 0) {
+        for (const s of spinObjects) {
+          s.obj.rotation.x += s.rx * 2
+          s.obj.rotation.y += s.ry * 2
+          s.obj.rotation.z += s.rz * 2
         }
       }
+      lightSculptureGroup.rotation.y += 0.0007
+      lightSculptureGroup.position.y = ICO_CY + Math.sin(frameCount * 0.006) * 0.5
     }
-    // Unused slots stay zeroed (zero-length, invisible segments) so the
-    // fat-line geometry can just always rebuild from the full fixed array.
-    for (let k = cc * 6; k < MAX_LINES * 6; k++) { linePositions[k] = 0; lineColors[k] = 0 }
-    const lg = lineSegments.geometry as LineSegmentsGeometry
-    lg.setPositions(linePositions)
-    lg.setColors(lineColors)
-  }
-
-  // Data packets
-  for (let i = 0; i < PACKET_COUNT; i++) {
-    const pk = packetData[i]
-    pk.t += pk.speed
-    if (pk.t >= 1) { pk.t = 0; pk.from = pk.to; pk.to = Math.floor(Math.random() * NODE_COUNT) }
-    dummy.position.lerpVectors(nodesMeshes[pk.from].position, nodesMeshes[pk.to].position, pk.t)
-    dummy.updateMatrix()
-    packetsMesh.setMatrixAt(i, dummy.matrix)
-  }
-  packetsMesh.instanceMatrix.needsUpdate = true
-
-  // Rotate shapes — outer/mid shells spin on independent axes on top of
-  // the group's base rotation, for real layered parallax depth instead
-  // of both shells moving as one rigid unit.
-  icoGroup.rotation.x += 0.0022
-  icoGroup.rotation.y += 0.0036
-  if (outerShellMesh) { outerShellMesh.rotation.y -= 0.0028; outerShellMesh.rotation.z += 0.0012 }
-  if (midShellMesh)   { midShellMesh.rotation.x   += 0.0016; midShellMesh.rotation.y   -= 0.0020 }
-  octMesh.rotation.x  += 0.003
-  octMesh.rotation.z  += 0.0025
-  if (frameCount % 5 === 0) stars.rotation.y += 0.0006
-  // Coin/logo: gentle Y-axis oscillation, not a continuous full spin —
-  // a full rotation always passes through edge-on at some point (that's
-  // just how a spinning disc looks), which conflicts with "keep the coin
-  // facing the camera". This wobbles within a bounded range instead, so
-  // the face and logo stay visible at all times.
-  if (logoGroup) {
-    logoGroup.rotation.y = Math.sin(frameCount * 0.0035) * 0.32
-  }
-
-  // Light-theme sculpture — every piece spins independently at its own
-  // slow rate, plus a very gentle overall group drift for a weightless,
-  // floating feel.
-  if (lightSculptureGroup && lightSculptureGroup.visible) {
-    for (const s of spinObjects) {
-      s.obj.rotation.x += s.rx
-      s.obj.rotation.y += s.ry
-      s.obj.rotation.z += s.rz
+    if (logoGroup) logoGroup.rotation.y = Math.sin(frameCount * 0.0035) * 0.28
+  } else {
+    // ── Dark mode: run the full node / line / packet network ────────────────
+    for (let i = 0; i < NODE_COUNT; i++) {
+      const p = nodesMeshes[i].position
+      const v = nodeVelocities[i]
+      p.addScaledVector(v, 1)
+      if (p.x < FIELD_X_MIN || p.x > FIELD_X_MAX) v.x *= -1
+      if (p.y < FIELD_Y_MIN || p.y > FIELD_Y_MAX) v.y *= -1
+      if (Math.abs(p.z) > 17) v.z *= -1
+      if (inTextZone(p.x, p.y)) { v.x = Math.abs(v.x); v.y = -Math.abs(v.y) }
+      if (inIcoZone(p.x, p.y)) {
+        const dx = p.x - ICO_CX, dy = p.y - ICO_CY
+        const len = Math.hypot(dx, dy) || 1
+        v.x = (dx / len) * Math.abs(v.x || 0.01)
+        v.y = (dy / len) * Math.abs(v.y || 0.01)
+      }
+      const sc = 1 + Math.sin(frameCount * 0.06 + i * 0.7) * 0.22
+      nodesMeshes[i].scale.setScalar(sc)
     }
-    lightSculptureGroup.rotation.y += 0.0007
-    lightSculptureGroup.position.y = ICO_CY + Math.sin(frameCount * 0.006) * 0.6
+
+    if (frameCount % 2 === 0) {
+      let cc = 0
+      for (let i = 0; i < NODE_COUNT && cc < MAX_LINES; i++) {
+        const pi = nodesMeshes[i].position
+        for (let j = i + 1; j < NODE_COUNT && cc < MAX_LINES; j++) {
+          const pj = nodesMeshes[j].position
+          const dx = pi.x - pj.x, dy = pi.y - pj.y, dz = pi.z - pj.z
+          const d2 = dx * dx + dy * dy + dz * dz
+          if (d2 < MAX_DIST_SQ) {
+            const a = (1 - d2 / MAX_DIST_SQ) * 0.75
+            const idx = cc * 6
+            linePositions[idx]   = pi.x; linePositions[idx+1] = pi.y; linePositions[idx+2] = pi.z
+            linePositions[idx+3] = pj.x; linePositions[idx+4] = pj.y; linePositions[idx+5] = pj.z
+            lineColors[idx]   = a * 0.08; lineColors[idx+1] = a * 0.88; lineColors[idx+2] = a
+            lineColors[idx+3] = a * 0.08; lineColors[idx+4] = a * 0.88; lineColors[idx+5] = a
+            cc++
+          }
+        }
+      }
+      for (let k = cc * 6; k < MAX_LINES * 6; k++) { linePositions[k] = 0; lineColors[k] = 0 }
+      const lg = lineSegments.geometry as LineSegmentsGeometry
+      lg.setPositions(linePositions)
+      lg.setColors(lineColors)
+    }
+
+    for (let i = 0; i < PACKET_COUNT; i++) {
+      const pk = packetData[i]
+      pk.t += pk.speed
+      if (pk.t >= 1) { pk.t = 0; pk.from = pk.to; pk.to = Math.floor(Math.random() * NODE_COUNT) }
+      dummy.position.lerpVectors(nodesMeshes[pk.from].position, nodesMeshes[pk.to].position, pk.t)
+      dummy.updateMatrix()
+      packetsMesh.setMatrixAt(i, dummy.matrix)
+    }
+    packetsMesh.instanceMatrix.needsUpdate = true
+
+    icoGroup.rotation.x += 0.0022
+    icoGroup.rotation.y += 0.0036
+    if (outerShellMesh) { outerShellMesh.rotation.y -= 0.0028; outerShellMesh.rotation.z += 0.0012 }
+    if (midShellMesh)   { midShellMesh.rotation.x   += 0.0016; midShellMesh.rotation.y   -= 0.0020 }
+    octMesh.rotation.x  += 0.003
+    octMesh.rotation.z  += 0.0025
+    if (frameCount % 5 === 0) stars.rotation.y += 0.0006
+    if (logoGroup) logoGroup.rotation.y = Math.sin(frameCount * 0.0035) * 0.32
   }
 
   // Camera parallax
@@ -650,11 +634,7 @@ self.onmessage = (e: MessageEvent) => {
     // glass) need this for realistic highlight rolloff instead of blown-
     // out white specular hotspots. Harmless to Basic/Line materials.
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 0.86
-    // Halves the internal render-target resolution used for the glass
-    // transmission pass — keeps real refraction on the two hero glass
-    // panels without paying full cost for it.
-    renderer.transmissionResolutionScale = 0.5
+    renderer.toneMappingExposure = 0.88
 
     buildScene()
 

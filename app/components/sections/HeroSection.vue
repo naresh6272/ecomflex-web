@@ -127,7 +127,7 @@ onMounted(async () => {
   // frame with 20+ clearcoat-shaded PBR objects, which is a far bigger
   // performance cost than object/draw-call count. 1.25 is still crisp
   // for a decorative background graphic.
-  const dpr = Math.min(window.devicePixelRatio || 1, 1.25)
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.0)
   worker.postMessage({ type: 'init', canvas: offscreen, width: W, height: H, dpr }, [offscreen])
 
   const { theme } = useColorTheme()

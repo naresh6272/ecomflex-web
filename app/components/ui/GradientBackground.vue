@@ -1,10 +1,8 @@
 <template>
   <div class="gb-root" aria-hidden="true">
-    <!-- large drifting colour orbs -->
+    <!-- 3 drifting colour orbs (was 5 — fewer compositing layers) -->
     <div class="gb-orb gb-blue-1" />
     <div class="gb-orb gb-violet" />
-    <div class="gb-orb gb-amber" />
-    <div class="gb-orb gb-blue-2" />
     <div class="gb-orb gb-cyan" />
     <!-- dot-grid overlay -->
     <div class="gb-grid" />
@@ -48,54 +46,36 @@
   will-change: transform;
 }
 
-/* Blue — top-left, large */
+/* Blue — top-left */
 .gb-blue-1 {
-  width: 900px; height: 900px;
-  background: radial-gradient(circle, rgba(37,99,235,0.38) 0%, transparent 68%);
-  filter: blur(90px);
-  top: -380px; left: -320px;
-  animation: drift-1 28s ease-in-out infinite;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(37,99,235,0.32) 0%, transparent 68%);
+  filter: blur(48px);
+  top: -300px; left: -260px;
+  animation: drift-1 34s ease-in-out infinite;
 }
 /* Violet — bottom-right */
 .gb-violet {
-  width: 800px; height: 800px;
-  background: radial-gradient(circle, rgba(124,58,237,0.30) 0%, transparent 68%);
-  filter: blur(100px);
-  bottom: -320px; right: -260px;
-  animation: drift-2 32s ease-in-out infinite 3s;
-}
-/* Amber — top-right */
-.gb-amber {
   width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(245,158,11,0.26) 0%, transparent 68%);
-  filter: blur(80px);
-  top: -120px; right: -160px;
-  animation: drift-3 24s ease-in-out infinite 6s;
-}
-/* Blue-2 — bottom-left */
-.gb-blue-2 {
-  width: 700px; height: 700px;
-  background: radial-gradient(circle, rgba(37,99,235,0.22) 0%, transparent 68%);
-  filter: blur(110px);
-  bottom: -240px; left: 8%;
-  animation: drift-4 36s ease-in-out infinite 1.5s;
+  background: radial-gradient(circle, rgba(124,58,237,0.26) 0%, transparent 68%);
+  filter: blur(52px);
+  bottom: -260px; right: -200px;
+  animation: drift-2 40s ease-in-out infinite 3s;
 }
 /* Cyan accent — centre */
 .gb-cyan {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(6,182,212,0.20) 0%, transparent 68%);
-  filter: blur(75px);
-  top: 40%; left: 45%;
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(6,182,212,0.18) 0%, transparent 68%);
+  filter: blur(40px);
+  top: 42%; left: 46%;
   transform: translate(-50%, -50%);
-  animation: drift-5 20s ease-in-out infinite 4s;
+  animation: drift-5 28s ease-in-out infinite 4s;
 }
 
 /* Dark-theme: dial everything down */
-:root[data-theme="dark"] .gb-blue-1  { background: radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%); }
-:root[data-theme="dark"] .gb-violet  { background: radial-gradient(circle, rgba(124,58,237,0.10) 0%, transparent 70%); }
-:root[data-theme="dark"] .gb-amber   { background: radial-gradient(circle, rgba(245,158,11,0.09) 0%, transparent 70%); }
-:root[data-theme="dark"] .gb-blue-2  { background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%); }
-:root[data-theme="dark"] .gb-cyan    { background: radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%); }
+:root[data-theme="dark"] .gb-blue-1 { background: radial-gradient(circle, rgba(37,99,235,0.10) 0%, transparent 70%); }
+:root[data-theme="dark"] .gb-violet { background: radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%); }
+:root[data-theme="dark"] .gb-cyan   { background: radial-gradient(circle, rgba(6,182,212,0.06) 0%, transparent 70%); }
 
 /* ── drift keyframes — organic, non-linear paths ───────────── */
 @keyframes drift-1 {
@@ -110,18 +90,6 @@
   33%  { transform: translate(-80px, -70px)  scale(1.06); }
   66%  { transform: translate(60px, -100px)  scale(0.96); }
   100% { transform: translate(0px, 0px)      scale(1.0); }
-}
-@keyframes drift-3 {
-  0%   { transform: translate(0px, 0px)    scale(1.0); }
-  40%  { transform: translate(-60px, 80px) scale(1.1); }
-  70%  { transform: translate(-30px, 40px) scale(0.92); }
-  100% { transform: translate(0px, 0px)    scale(1.0); }
-}
-@keyframes drift-4 {
-  0%   { transform: translate(0px, 0px)     scale(1.0); }
-  30%  { transform: translate(70px, -60px)  scale(1.04); }
-  60%  { transform: translate(30px, -100px) scale(1.08); }
-  100% { transform: translate(0px, 0px)     scale(1.0); }
 }
 @keyframes drift-5 {
   0%   { transform: translate(-50%, -50%) scale(1.0); }
