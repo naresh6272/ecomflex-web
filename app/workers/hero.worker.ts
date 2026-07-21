@@ -166,9 +166,9 @@ function buildScene() {
     })
     nodeMats.push(mat)
     const matLit = new THREE.MeshStandardMaterial({
-      color: bright ? 0x2563EB : 0x7C3AED,
-      emissive: bright ? 0x0A1D5E : 0x2D0E6B, emissiveIntensity: 0.14,
-      metalness: 0.80, roughness: 0.35,
+      color: bright ? 0xA67C00 : 0x52525B,
+      emissive: bright ? 0x3D2C05 : 0x1A1A1D, emissiveIntensity: 0.10,
+      metalness: 0.85, roughness: 0.40,
       transparent: true, opacity: bright ? 1 : 0.85,
     })
     nodeMatsLit.push(matLit)
@@ -227,7 +227,7 @@ function buildScene() {
   outerIcoMat = new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0.28 })
   midIcoMat   = new THREE.LineBasicMaterial({ color: ACCENT2, transparent: true, opacity: 0.10 })
   innerIcoMat = new THREE.MeshBasicMaterial({ color: 0x06090f, transparent: true, opacity: 0.90 })
-  innerIcoMatLit = new THREE.MeshStandardMaterial({ color: 0x1D4ED8, emissive: 0x0A1D5E, emissiveIntensity: 0.12, metalness: 0.85, roughness: 0.35, transparent: true, opacity: 0.92 })
+  innerIcoMatLit = new THREE.MeshStandardMaterial({ color: 0xA67C00, emissive: 0x3D2C05, emissiveIntensity: 0.10, metalness: 0.85, roughness: 0.38, transparent: true, opacity: 0.92 })
   outerShellMesh = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(9, 2)), outerIcoMat)
   midShellMesh   = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(12, 2)), midIcoMat)
   icoGroup.add(outerShellMesh)
@@ -261,21 +261,21 @@ function buildLightSculpture() {
   group.visible = false
 
   const goldMat = () => new THREE.MeshPhysicalMaterial({
-    color: 0x2563EB, metalness: 0.80, roughness: 0.25,
-    clearcoat: 1, clearcoatRoughness: 0.12,
-    emissive: 0x0A1D5E, emissiveIntensity: 0.10,
+    color: 0xD4AF37, metalness: 1, roughness: 0.30,
+    clearcoat: 1, clearcoatRoughness: 0.15,
+    emissive: 0x3D2C05, emissiveIntensity: 0.04,
   })
   const glassMat = () => new THREE.MeshPhysicalMaterial({
-    color: 0xBFD7FF, roughness: 0.05,
+    color: 0xF3E6C8, roughness: 0.05,
     metalness: 0, clearcoat: 1, clearcoatRoughness: 0.04,
-    transparent: true, opacity: 0.32, side: THREE.DoubleSide,
-  })
-  const glassMatHero = () => new THREE.MeshPhysicalMaterial({
-    color: 0xBFD7FF, roughness: 0.04,
-    metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03,
     transparent: true, opacity: 0.42, side: THREE.DoubleSide,
   })
-  const edgeMat = new THREE.MeshBasicMaterial({ color: 0x2563EB, transparent: true, opacity: 0.55 })
+  const glassMatHero = () => new THREE.MeshPhysicalMaterial({
+    color: 0xF3E6C8, roughness: 0.04,
+    metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03,
+    transparent: true, opacity: 0.5, side: THREE.DoubleSide,
+  })
+  const edgeMat = new THREE.MeshBasicMaterial({ color: 0xD4AF37, transparent: true, opacity: 0.6 })
 
   // 8 floating glass plates arranged in a balanced ring around the coin
   // (positions rebalanced so their average sits at the origin — the
@@ -330,7 +330,7 @@ function buildLightSculpture() {
     const arc = new THREE.Mesh(
       new THREE.TorusGeometry(s.r, s.tube, 8, 28, s.arc),
       s.faint
-        ? new THREE.MeshPhysicalMaterial({ color: 0x7C3AED, metalness: 0.8, roughness: 0.4, clearcoat: 1, transparent: true, opacity: 0.30 })
+        ? new THREE.MeshPhysicalMaterial({ color: 0xD4AF37, metalness: 1, roughness: 0.4, clearcoat: 1, transparent: true, opacity: 0.35 })
         : goldMat(),
     )
     arc.rotation.set(s.rx, s.ry, s.rz)
@@ -343,10 +343,10 @@ function buildLightSculpture() {
   // them instead of one per joint). Radius tightened so the network
   // never reaches toward the heading text, and count roughly halved.
   const jointMat = new THREE.MeshStandardMaterial({
-    color: 0x93C5FD, emissive: 0x2563EB, emissiveIntensity: 0.45, metalness: 0.5, roughness: 0.3,
+    color: 0xF5DE9C, emissive: 0xD4AF37, emissiveIntensity: 0.35, metalness: 0.6, roughness: 0.3,
   })
   const rodMat = new THREE.MeshPhysicalMaterial({
-    color: 0x1D4ED8, metalness: 0.90, roughness: 0.28, clearcoat: 1,
+    color: 0xA67C00, metalness: 1, roughness: 0.35, clearcoat: 1,
   })
   const JOINT_COUNT = 7
   const joints: THREE.Vector3[] = []
@@ -377,9 +377,9 @@ function buildLightSculpture() {
   const glowCanvas = new OffscreenCanvas(64, 64)
   const glowCtx = glowCanvas.getContext('2d')!
   const grad = glowCtx.createRadialGradient(32, 32, 0, 32, 32, 32)
-  grad.addColorStop(0, 'rgba(147,197,253,0.9)')
-  grad.addColorStop(0.4, 'rgba(96,165,250,0.35)')
-  grad.addColorStop(1, 'rgba(96,165,250,0)')
+  grad.addColorStop(0, 'rgba(255,235,180,0.9)')
+  grad.addColorStop(0.4, 'rgba(245,222,156,0.35)')
+  grad.addColorStop(1, 'rgba(245,222,156,0)')
   glowCtx.fillStyle = grad
   glowCtx.fillRect(0, 0, 64, 64)
   const glowTex = new THREE.CanvasTexture(glowCanvas as unknown as HTMLCanvasElement)
@@ -500,9 +500,9 @@ function animate() {
           const idx = cc * 6
           linePositions[idx]   = pi.x; linePositions[idx+1] = pi.y; linePositions[idx+2] = pi.z
           linePositions[idx+3] = pj.x; linePositions[idx+4] = pj.y; linePositions[idx+5] = pj.z
-          const lr = lightMode ? a * 0.14 : a * 0.08
-          const lg = lightMode ? a * 0.37 : a * 0.88
-          const lb = lightMode ? a * 0.92 : a * 1.00
+          const lr = lightMode ? a * 0.48 : a * 0.08
+          const lg = lightMode ? a * 0.34 : a * 0.88
+          const lb = lightMode ? a * 0.07 : a * 1.00
           lineColors[idx]   = lr; lineColors[idx+1] = lg; lineColors[idx+2] = lb
           lineColors[idx+3] = lr; lineColors[idx+4] = lg; lineColors[idx+5] = lb
           cc++
@@ -638,13 +638,13 @@ self.onmessage = (e: MessageEvent) => {
     // outerIcoMat is geometrically the smaller/inner shell (radius 9) —
     // silver/gray in light theme, a quiet secondary layer. midIcoMat is
     // the larger/outer shell (radius 12) — the dominant gold sphere.
-    if (outerIcoMat)  { outerIcoMat.color.setHex(dark ? 0x06b6d4 : 0x3B82F6); outerIcoMat.opacity = dark ? 0.55 : 0.70 }
-    if (midIcoMat)    { midIcoMat.color.setHex(dark ? 0x6366f1 : 0x2563EB);   midIcoMat.opacity   = dark ? 0.22 : 0.80 }
-    if (octMat)       { octMat.color.setHex(dark ? 0x06b6d4 : 0x7C3AED);      octMat.opacity      = dark ? 0.22 : 0.45 }
-    if (starsMat)     { starsMat.color.setHex(dark ? 0xffffff : 0x3B82F6);    starsMat.opacity    = dark ? 0.35 : 0.22 }
-    if (packetsMat)   packetsMat.color.setHex(dark ? 0x06b6d4 : 0x60A5FA)
-    if (logoGlowMat)  logoGlowMat.color.setHex(dark ? ACCENT : 0x2563EB)
-    if (logoRingMat)  logoRingMat.color.setHex(dark ? ACCENT : 0x2563EB)
+    if (outerIcoMat)  { outerIcoMat.color.setHex(dark ? 0x06b6d4 : 0x52525B); outerIcoMat.opacity = dark ? 0.55 : 0.65 }
+    if (midIcoMat)    { midIcoMat.color.setHex(dark ? 0x6366f1 : 0xA67C00);   midIcoMat.opacity   = dark ? 0.22 : 0.75 }
+    if (octMat)       { octMat.color.setHex(dark ? 0x06b6d4 : 0xA67C00);      octMat.opacity      = dark ? 0.22 : 0.40 }
+    if (starsMat)     { starsMat.color.setHex(dark ? 0xffffff : 0xA67C00);    starsMat.opacity    = dark ? 0.35 : 0.25 }
+    if (packetsMat)   packetsMat.color.setHex(dark ? 0x06b6d4 : 0xA67C00)
+    if (logoGlowMat)  logoGlowMat.color.setHex(dark ? ACCENT : 0xD4AF37)
+    if (logoRingMat)  logoRingMat.color.setHex(dark ? ACCENT : 0xD4AF37)
     if (logoTex) {
       const src = dark ? logoCanvasColor : logoCanvasBlack
       if (src) { logoTex.image = src as unknown as HTMLCanvasElement; logoTex.needsUpdate = true }
@@ -709,7 +709,7 @@ self.onmessage = (e: MessageEvent) => {
 
     // Soft glow disc behind logo
     const glowMat = new THREE.MeshBasicMaterial({
-      color: lightMode ? 0x2563EB : ACCENT, transparent: true, opacity: 0.20,
+      color: lightMode ? 0xB8860B : ACCENT, transparent: true, opacity: 0.18,
       side: THREE.DoubleSide, depthTest: false, depthWrite: false,
     })
     logoGlowMat = glowMat
@@ -723,7 +723,7 @@ self.onmessage = (e: MessageEvent) => {
     // dimensional coin look. Hidden in dark theme (glowMesh above is used
     // there instead, unchanged).
     const coinMat = new THREE.MeshPhysicalMaterial({
-      color: 0x0F172A, metalness: 0.95, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.06,
+      color: 0xD4AF37, metalness: 1, roughness: 0.16, clearcoat: 1, clearcoatRoughness: 0.08,
     })
     coinMesh = new THREE.Mesh(new THREE.CylinderGeometry(LW * 0.62, LW * 0.62, 0.55, 48), coinMat)
     coinMesh.rotation.x = Math.PI / 2
@@ -743,7 +743,7 @@ self.onmessage = (e: MessageEvent) => {
 
     // Ring outline around the logo
     const ringMat = new THREE.MeshBasicMaterial({
-      color: lightMode ? 0x2563EB : ACCENT, transparent: true, opacity: 0.55,
+      color: lightMode ? 0xB8860B : ACCENT, transparent: true, opacity: 0.50,
       side: THREE.DoubleSide, depthTest: false, depthWrite: false,
     })
     logoRingMat = ringMat
