@@ -257,7 +257,7 @@ function buildLightSculpture() {
   // space; this brings it back up while keeping the rightward shift for
   // whitespace from the heading.
   group.position.set(ICO_CX + 4, ICO_CY, -8)
-  group.scale.setScalar(0.875)
+  group.scale.setScalar(0.80)
   group.visible = false
 
   const goldMat = () => new THREE.MeshPhysicalMaterial({
@@ -443,59 +443,73 @@ function buildLightSculpture() {
   spinObjects.push({ obj: cubeInstancesLg, rx: 0.0015, ry: 0.0021, rz: 0.0009 })
   spinObjects.push({ obj: cubeInstancesSm, rx: -0.0018, ry: 0.0024, rz: -0.0011 })
 
-  // Glass + gold tetrahedra and hex coins scattered at outer ring
-  for (let i = 0; i < 6; i++) {
-    const kind = i % 3
-    const frag = kind === 0
-      ? new THREE.Mesh(new THREE.TetrahedronGeometry(0.7, 0), glassMat())
-      : kind === 1
-        ? new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.18, 6), goldMat())
-        : new THREE.Mesh(new THREE.OctahedronGeometry(0.55, 0), goldMat())
-    const theta = (i / 6) * Math.PI * 2 + 0.5
-    const r = 10 + Math.random() * 8
-    frag.position.set(r * Math.cos(theta), (Math.random() - 0.5) * 14, r * Math.sin(theta) * 0.6)
-    frag.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
-    group.add(frag)
-    spinObjects.push({
-      obj: frag,
-      rx: (Math.random() - 0.5) * 0.006,
-      ry: (Math.random() - 0.5) * 0.006,
-      rz: (Math.random() - 0.5) * 0.006,
-    })
-  }
+  // Shared materials for fragments/rings/spheres — one GPU state per type
+  // instead of one per mesh, which was the main source of draw-call overhead.
+  const sharedGoldFrag  = goldMat()
+  const sharedGlassFrag = glassMat()
 
-  // Decorative rings — small gold tori floating in the outer field
-  const ringPositions = [
-    { r: 2.8,  tube: 0.13, x:  11,   y:  3.5,  z: -5,  rx: 0.5,  ry: 0.3 },
-    { r: 2.0,  tube: 0.11, x:  -9.5, y:  5.5,  z:  4,  rx: 1.1,  ry: 0.6 },
-    { r: 3.2,  tube: 0.14, x:  4.5,  y: -11,   z:  5,  rx: 0.2,  ry: 1.3 },
-    { r: 1.8,  tube: 0.10, x: -11,   y: -4.5,  z: -4,  rx: 0.8,  ry: 0.4 },
-    { r: 2.4,  tube: 0.12, x:  7.5,  y:  9.5,  z:  3,  rx: 0.4,  ry: 0.9 },
+  // Fragments: 3 types, each instanced (3 draw calls instead of 9)
+  const tetraInst = new THREE.InstancedMesh(new THREE.TetrahedronGeometry(0.7, 0), sharedGlassFrag, 3)
+  const hexInst   = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.6, 0.6, 0.18, 6), sharedGoldFrag, 3)
+  const octaInst  = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.55, 0), sharedGoldFrag, 3)
+  ;[tetraInst, hexInst, octaInst].forEach((inst, ti) => {
+    for (let i = 0; i < 3; i++) {
+      const theta = ((ti * 3 + i) / 9) * Math.PI * 2 + 0.5
+      const r = 10 + i * 2.5
+      dummyM.position.set(r * Math.cos(theta), (i - 1) * 4.5, r * Math.sin(theta) * 0.6)
+      dummyM.rotation.set(i * 1.1, i * 0.7, i * 0.9)
+      dummyM.scale.setScalar(1)
+      dummyM.updateMatrix()
+      inst.setMatrixAt(i, dummyM.matrix)
+    }
+    group.add(inst)
+  })
+  spinObjects.push({ obj: tetraInst, rx:  0.003, ry: -0.002, rz:  0.004 })
+  spinObjects.push({ obj: hexInst,   rx: -0.002, ry:  0.003, rz: -0.002 })
+  spinObjects.push({ obj: octaInst,  rx:  0.002, ry:  0.004, rz: -0.003 })
+
+  // Rings: single InstancedMesh — 1 draw call for all 5 rings
+  // Unit torus (r=1) scaled per instance so tube stays proportional.
+  const ringDefs = [
+    { r: 2.8, x:  11,   y:  3.5, z: -5,  rx: 0.5,  ry: 0.3 },
+    { r: 2.0, x:  -9.5, y:  5.5, z:  4,  rx: 1.1,  ry: 0.6 },
+    { r: 3.2, x:   4.5, y: -11,  z:  5,  rx: 0.2,  ry: 0.8 },
+    { r: 1.8, x: -11,   y: -4.5, z: -4,  rx: 0.8,  ry: 0.4 },
+    { r: 2.4, x:   7.5, y:  9.5, z:  3,  rx: 0.4,  ry: 0.6 },
   ]
-  for (const rs of ringPositions) {
-    const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(rs.r, rs.tube, 10, 28),
-      goldMat(),
-    )
-    ring.position.set(rs.x, rs.y, rs.z)
-    ring.rotation.set(rs.rx, rs.ry, 0)
-    group.add(ring)
-    spinObjects.push({ obj: ring, rx: 0.0007, ry: 0.0013, rz: 0.0005 })
-  }
+  const ringInst = new THREE.InstancedMesh(
+    new THREE.TorusGeometry(1, 0.09, 8, 28),
+    sharedGoldFrag,
+    ringDefs.length,
+  )
+  ringDefs.forEach((rd, i) => {
+    dummyM.position.set(rd.x, rd.y, rd.z)
+    dummyM.rotation.set(rd.rx, rd.ry, 0)
+    dummyM.scale.setScalar(rd.r)
+    dummyM.updateMatrix()
+    ringInst.setMatrixAt(i, dummyM.matrix)
+  })
+  group.add(ringInst)
+  spinObjects.push({ obj: ringInst, rx: 0.0007, ry: 0.0013, rz: 0.0005 })
 
-  // Decorative spheres — metallic orbs scattered evenly around the outer ring
+  // Spheres: single InstancedMesh — 1 draw call for all 6 orbs
+  const sphereInst = new THREE.InstancedMesh(
+    new THREE.SphereGeometry(1, 8, 8),
+    sharedGoldFrag,
+    6,
+  )
   for (let i = 0; i < 6; i++) {
     const theta = (i / 6) * Math.PI * 2 + 1.0
-    const r = 10 + Math.random() * 5
-    const size = 0.4 + Math.random() * 0.35
-    const sphere = new THREE.Mesh(
-      new THREE.SphereGeometry(size, 10, 10),
-      i % 2 === 0 ? goldMat() : glassMat(),
-    )
-    sphere.position.set(r * Math.cos(theta), (Math.random() - 0.5) * 12, r * Math.sin(theta) * 0.6)
-    group.add(sphere)
-    spinObjects.push({ obj: sphere, rx: 0.001, ry: 0.0014, rz: 0.0008 })
+    const r = 10 + i * 0.8
+    const size = 0.45 + (i % 3) * 0.15
+    dummyM.position.set(r * Math.cos(theta), ((i % 3) - 1) * 3.5, r * Math.sin(theta) * 0.6)
+    dummyM.rotation.set(0, 0, 0)
+    dummyM.scale.setScalar(size)
+    dummyM.updateMatrix()
+    sphereInst.setMatrixAt(i, dummyM.matrix)
   }
+  group.add(sphereInst)
+  spinObjects.push({ obj: sphereInst, rx: 0.001, ry: 0.0014, rz: 0.0008 })
 
   scene.add(group)
   lightSculptureGroup = group

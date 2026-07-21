@@ -289,18 +289,24 @@ onBeforeUnmount(() => {
 }
 .hero-word { display:inline-block; will-change:transform,opacity; }
 .gradient-text {
-  background:linear-gradient(120deg,#2563EB 0%,#f59e0b 50%,#60A5FA 100%);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent; background-clip:text;
+  background: linear-gradient(120deg, #06b6d4, #f59e0b, #a855f7, #3b82f6, #10b981, #f59e0b, #06b6d4);
+  background-size: 280% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: grad-shift 5s linear infinite;
 }
 :root[data-theme="light"] .gradient-text {
-  background:linear-gradient(135deg,#1D4ED8 0%,#7C3AED 50%,#2563EB 100%);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent; background-clip:text;
+  background: linear-gradient(120deg, #D97706, #7C3AED, #2563EB, #059669, #D97706, #7C3AED, #D97706);
+  background-size: 280% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: grad-shift 5s linear infinite;
 }
 @keyframes grad-shift {
-  0%,100% { background-position:0% 50%; }
-  50%      { background-position:100% 50%; }
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
 .hero-sub {
   font-size:clamp(1rem,1.8vw,1.25rem); color:rgba(255,255,255,0.50);
