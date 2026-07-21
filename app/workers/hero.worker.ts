@@ -709,6 +709,13 @@ self.onmessage = (e: MessageEvent) => {
 
     logoGroup = new THREE.Group()
     logoGroup.position.copy(icoGroup.position)
+    // theme message arrives before logoGroup exists, so the +4 light-mode
+    // x-offset is never applied at that point. Apply it here if already in
+    // light mode so the coin sits at the sculpture group's origin (ICO_CX+4).
+    if (lightMode) {
+      logoGroup.position.x = icoGroup.position.x + 4
+      logoGroup.scale.setScalar(0.8)
+    }
 
     // Soft glow disc behind logo
     const glowMat = new THREE.MeshBasicMaterial({
