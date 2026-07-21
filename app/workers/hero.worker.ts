@@ -257,7 +257,7 @@ function buildLightSculpture() {
   // space; this brings it back up while keeping the rightward shift for
   // whitespace from the heading.
   group.position.set(ICO_CX + 4, ICO_CY, -8)
-  group.scale.setScalar(0.95)
+  group.scale.setScalar(0.875)
   group.visible = false
 
   const goldMat = () => new THREE.MeshPhysicalMaterial({
@@ -266,16 +266,16 @@ function buildLightSculpture() {
     emissive: 0x3D2C05, emissiveIntensity: 0.04,
   })
   const glassMat = () => new THREE.MeshPhysicalMaterial({
-    color: 0xF3E6C8, roughness: 0.05,
-    metalness: 0, clearcoat: 1, clearcoatRoughness: 0.04,
-    transparent: true, opacity: 0.42, side: THREE.DoubleSide,
+    color: 0xF5EAC8, roughness: 0.04,
+    metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.03,
+    transparent: true, opacity: 0.58, side: THREE.DoubleSide,
   })
   const glassMatHero = () => new THREE.MeshPhysicalMaterial({
-    color: 0xF3E6C8, roughness: 0.04,
-    metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03,
-    transparent: true, opacity: 0.5, side: THREE.DoubleSide,
+    color: 0xFAF0D0, roughness: 0.03,
+    metalness: 0.08, clearcoat: 1, clearcoatRoughness: 0.02,
+    transparent: true, opacity: 0.68, side: THREE.DoubleSide,
   })
-  const edgeMat = new THREE.MeshBasicMaterial({ color: 0xD4AF37, transparent: true, opacity: 0.6 })
+  const edgeMat = new THREE.MeshBasicMaterial({ color: 0xD4AF37, transparent: true, opacity: 0.80 })
 
   // 8 floating glass plates arranged in a balanced ring around the coin
   // (positions rebalanced so their average sits at the origin — the
@@ -284,17 +284,17 @@ function buildLightSculpture() {
   // Edge frames use a single InstancedMesh (1 draw call for all 8
   // instead of 8 separate meshes) — this plus the rod instancing below
   // is the actual fix for the lag: draw-call count, not object count.
-  // Plates pushed to 11-14 units from centre — coin (LW=8, r≈4) is well clear.
-  // Layout: coin → 7+ unit gap → plates → orbital arcs (r=12,16).
+  // Plates in 11-14 unit ring. ry kept ≤0.55 so plates always face camera
+  // (large ry → plate turns edge-on → nearly invisible).
   const plateSpecs = [
-    { w: 7.0, h: 5.0, x: 9.5,  y: 7.5,  z: 2.6,  rx: 0.4,  ry: 0.6,  rz: 0.1,  hero: true  }, // top-right   dist≈12.1
-    { w: 5.0, h: 7.2, x: 13.5, y: 0.5,  z: -3.0, rx: -0.3, ry: 1.1,  rz: 0.5,  hero: true  }, // right        dist≈13.5
-    { w: 5.5, h: 3.8, x: 8.5,  y: -9.5, z: 4.4,  rx: 0.8,  ry: -0.4, rz: -0.2, hero: false }, // bottom-right dist≈12.8
-    { w: 4.2, h: 4.2, x: 0.5,  y: -12,  z: 1.8,  rx: 0.2,  ry: -0.9, rz: 0.3,  hero: false }, // bottom       dist≈12
-    { w: 4.5, h: 6.2, x: -9.5, y: -8.0, z: -2.6, rx: -0.5, ry: 0.3,  rz: -0.4, hero: false }, // bottom-left  dist≈12.4
-    { w: 6.0, h: 4.0, x: -13,  y: 0.5,  z: -1.8, rx: 0.6,  ry: -1.2, rz: 0.2,  hero: false }, // left         dist≈13
-    { w: 3.8, h: 5.2, x: -8.5, y: 8.0,  z: -4.8, rx: 0.3,  ry: -0.6, rz: 0.15, hero: false }, // top-left     dist≈11.7
-    { w: 5.2, h: 3.6, x: 0.5,  y: 12,   z: 3.6,  rx: -0.7, ry: 0.5,  rz: -0.3, hero: false }, // top          dist≈12
+    { w: 6.5, h: 4.5, x:  9.5, y:  7.5, z:  2.6, rx:  0.25, ry:  0.35, rz:  0.12, hero: true  }, // top-right   dist≈12.1
+    { w: 5.5, h: 6.0, x: 13.5, y:  0.5, z: -3.0, rx: -0.20, ry:  0.55, rz:  0.30, hero: true  }, // right        dist≈13.5
+    { w: 5.5, h: 4.0, x:  8.5, y: -9.5, z:  4.4, rx:  0.30, ry: -0.30, rz: -0.15, hero: false }, // bottom-right dist≈12.8
+    { w: 4.5, h: 4.5, x:  0.5, y: -12,  z:  1.8, rx:  0.15, ry: -0.45, rz:  0.20, hero: false }, // bottom       dist≈12
+    { w: 5.0, h: 5.5, x: -9.5, y: -8.0, z: -2.6, rx: -0.28, ry:  0.20, rz: -0.22, hero: false }, // bottom-left  dist≈12.4
+    { w: 6.0, h: 4.5, x: -13,  y:  0.5, z: -1.8, rx:  0.22, ry: -0.50, rz:  0.18, hero: false }, // left         dist≈13
+    { w: 4.5, h: 5.5, x: -8.5, y:  8.0, z: -4.8, rx:  0.20, ry: -0.35, rz:  0.10, hero: false }, // top-left     dist≈11.7
+    { w: 5.5, h: 4.0, x:  0.5, y: 12,   z:  3.6, rx: -0.25, ry:  0.30, rz: -0.18, hero: false }, // top          dist≈12
   ]
   const edgeUnitGeo = new THREE.PlaneGeometry(1, 1)
   const edgeInstances = new THREE.InstancedMesh(edgeUnitGeo, edgeMat, plateSpecs.length)
