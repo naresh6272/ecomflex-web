@@ -284,18 +284,17 @@ function buildLightSculpture() {
   // Edge frames use a single InstancedMesh (1 draw call for all 8
   // instead of 8 separate meshes) — this plus the rod instancing below
   // is the actual fix for the lag: draw-call count, not object count.
-  // Plates are arranged in a ring at 9-13 units from centre so none of them
-  // overlap the coin (effective radius ~3.7 units). The orbital arcs (r=12,16)
-  // wrap the outer boundary, giving: coin → clear gap → plates → arcs.
+  // Plates pushed to 11-14 units from centre — coin (LW=8, r≈4) is well clear.
+  // Layout: coin → 7+ unit gap → plates → orbital arcs (r=12,16).
   const plateSpecs = [
-    { w: 6,  h: 4.2, x: 7.5,  y: 6.5,  z: 2.6,  rx: 0.4,  ry: 0.6,  rz: 0.1,  hero: true  }, // top-right
-    { w: 4.2,h: 6,   x: 11.5, y: 0.5,  z: -3.0, rx: -0.3, ry: 1.1,  rz: 0.5,  hero: true  }, // right
-    { w: 4.6,h: 3.1, x: 7.0,  y: -8.0, z: 4.4,  rx: 0.8,  ry: -0.4, rz: -0.2, hero: false }, // bottom-right
-    { w: 3.5,h: 3.5, x: 0.5,  y: -10,  z: 1.8,  rx: 0.2,  ry: -0.9, rz: 0.3,  hero: false }, // bottom
-    { w: 3.8,h: 5.4, x: -8.5, y: -7.0, z: -2.6, rx: -0.5, ry: 0.3,  rz: -0.4, hero: false }, // bottom-left
-    { w: 5,  h: 3.3, x: -11,  y: 0.5,  z: -1.8, rx: 0.6,  ry: -1.2, rz: 0.2,  hero: false }, // left
-    { w: 3.1,h: 4.3, x: -7.0, y: 7.5,  z: -4.8, rx: 0.3,  ry: -0.6, rz: 0.15, hero: false }, // top-left
-    { w: 4.3,h: 2.9, x: 0.5,  y: 9.5,  z: 3.6,  rx: -0.7, ry: 0.5,  rz: -0.3, hero: false }, // top
+    { w: 7.0, h: 5.0, x: 9.5,  y: 7.5,  z: 2.6,  rx: 0.4,  ry: 0.6,  rz: 0.1,  hero: true  }, // top-right   dist≈12.1
+    { w: 5.0, h: 7.2, x: 13.5, y: 0.5,  z: -3.0, rx: -0.3, ry: 1.1,  rz: 0.5,  hero: true  }, // right        dist≈13.5
+    { w: 5.5, h: 3.8, x: 8.5,  y: -9.5, z: 4.4,  rx: 0.8,  ry: -0.4, rz: -0.2, hero: false }, // bottom-right dist≈12.8
+    { w: 4.2, h: 4.2, x: 0.5,  y: -12,  z: 1.8,  rx: 0.2,  ry: -0.9, rz: 0.3,  hero: false }, // bottom       dist≈12
+    { w: 4.5, h: 6.2, x: -9.5, y: -8.0, z: -2.6, rx: -0.5, ry: 0.3,  rz: -0.4, hero: false }, // bottom-left  dist≈12.4
+    { w: 6.0, h: 4.0, x: -13,  y: 0.5,  z: -1.8, rx: 0.6,  ry: -1.2, rz: 0.2,  hero: false }, // left         dist≈13
+    { w: 3.8, h: 5.2, x: -8.5, y: 8.0,  z: -4.8, rx: 0.3,  ry: -0.6, rz: 0.15, hero: false }, // top-left     dist≈11.7
+    { w: 5.2, h: 3.6, x: 0.5,  y: 12,   z: 3.6,  rx: -0.7, ry: 0.5,  rz: -0.3, hero: false }, // top          dist≈12
   ]
   const edgeUnitGeo = new THREE.PlaneGeometry(1, 1)
   const edgeInstances = new THREE.InstancedMesh(edgeUnitGeo, edgeMat, plateSpecs.length)
@@ -423,29 +422,37 @@ function buildLightSculpture() {
   })
   group.add(rodInstances)
 
-  // Scattered fragments — cut from 12 to 7 (cubes specifically down ~40%,
-  // instanced into a single draw call since they share geometry).
-  const cubeGeo = new THREE.BoxGeometry(0.55, 0.55, 0.55)
-  const CUBE_COUNT = 7
-  const cubeInstances = new THREE.InstancedMesh(cubeGeo, goldMat(), CUBE_COUNT)
+  // Cubes — doubled count, two size variants for visual variety.
+  const CUBE_COUNT = 14
+  const cubeGeoLg = new THREE.BoxGeometry(0.65, 0.65, 0.65)
+  const cubeGeoSm = new THREE.BoxGeometry(0.38, 0.38, 0.38)
+  const cubeInstancesLg = new THREE.InstancedMesh(cubeGeoLg, goldMat(), CUBE_COUNT)
+  const cubeInstancesSm = new THREE.InstancedMesh(cubeGeoSm, goldMat(), CUBE_COUNT)
   for (let i = 0; i < CUBE_COUNT; i++) {
-    const theta = Math.random() * Math.PI * 2
+    const theta = (i / CUBE_COUNT) * Math.PI * 2 + Math.random() * 0.8
     const r = 9 + Math.random() * 9
-    dummyM.position.set(r * Math.cos(theta), (Math.random() - 0.5) * 14, r * Math.sin(theta) * 0.6)
-    dummyM.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
-    dummyM.updateMatrix()
-    cubeInstances.setMatrixAt(i, dummyM.matrix)
+    for (const inst of [cubeInstancesLg, cubeInstancesSm]) {
+      dummyM.position.set(r * Math.cos(theta), (Math.random() - 0.5) * 16, r * Math.sin(theta) * 0.65)
+      dummyM.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
+      dummyM.updateMatrix()
+      inst.setMatrixAt(i, dummyM.matrix)
+    }
   }
-  group.add(cubeInstances)
-  spinObjects.push({ obj: cubeInstances, rx: 0.0015, ry: 0.0021, rz: 0.0009 })
+  group.add(cubeInstancesLg)
+  group.add(cubeInstancesSm)
+  spinObjects.push({ obj: cubeInstancesLg, rx: 0.0015, ry: 0.0021, rz: 0.0009 })
+  spinObjects.push({ obj: cubeInstancesSm, rx: -0.0018, ry: 0.0024, rz: -0.0011 })
 
-  for (let i = 0; i < 4; i++) {
-    const kind = i % 2
+  // Glass + gold tetrahedra and hex coins scattered at outer ring
+  for (let i = 0; i < 6; i++) {
+    const kind = i % 3
     const frag = kind === 0
-      ? new THREE.Mesh(new THREE.TetrahedronGeometry(0.6, 0), glassMat())
-      : new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.16, 6), goldMat())
-    const theta = Math.random() * Math.PI * 2
-    const r = 9 + Math.random() * 9
+      ? new THREE.Mesh(new THREE.TetrahedronGeometry(0.7, 0), glassMat())
+      : kind === 1
+        ? new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.18, 6), goldMat())
+        : new THREE.Mesh(new THREE.OctahedronGeometry(0.55, 0), goldMat())
+    const theta = (i / 6) * Math.PI * 2 + 0.5
+    const r = 10 + Math.random() * 8
     frag.position.set(r * Math.cos(theta), (Math.random() - 0.5) * 14, r * Math.sin(theta) * 0.6)
     frag.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
     group.add(frag)
@@ -455,6 +462,39 @@ function buildLightSculpture() {
       ry: (Math.random() - 0.5) * 0.006,
       rz: (Math.random() - 0.5) * 0.006,
     })
+  }
+
+  // Decorative rings — small gold tori floating in the outer field
+  const ringPositions = [
+    { r: 2.8,  tube: 0.13, x:  11,   y:  3.5,  z: -5,  rx: 0.5,  ry: 0.3 },
+    { r: 2.0,  tube: 0.11, x:  -9.5, y:  5.5,  z:  4,  rx: 1.1,  ry: 0.6 },
+    { r: 3.2,  tube: 0.14, x:  4.5,  y: -11,   z:  5,  rx: 0.2,  ry: 1.3 },
+    { r: 1.8,  tube: 0.10, x: -11,   y: -4.5,  z: -4,  rx: 0.8,  ry: 0.4 },
+    { r: 2.4,  tube: 0.12, x:  7.5,  y:  9.5,  z:  3,  rx: 0.4,  ry: 0.9 },
+  ]
+  for (const rs of ringPositions) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(rs.r, rs.tube, 10, 28),
+      goldMat(),
+    )
+    ring.position.set(rs.x, rs.y, rs.z)
+    ring.rotation.set(rs.rx, rs.ry, 0)
+    group.add(ring)
+    spinObjects.push({ obj: ring, rx: 0.0007, ry: 0.0013, rz: 0.0005 })
+  }
+
+  // Decorative spheres — metallic orbs scattered evenly around the outer ring
+  for (let i = 0; i < 6; i++) {
+    const theta = (i / 6) * Math.PI * 2 + 1.0
+    const r = 10 + Math.random() * 5
+    const size = 0.4 + Math.random() * 0.35
+    const sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(size, 10, 10),
+      i % 2 === 0 ? goldMat() : glassMat(),
+    )
+    sphere.position.set(r * Math.cos(theta), (Math.random() - 0.5) * 12, r * Math.sin(theta) * 0.6)
+    group.add(sphere)
+    spinObjects.push({ obj: sphere, rx: 0.001, ry: 0.0014, rz: 0.0008 })
   }
 
   scene.add(group)
@@ -704,7 +744,7 @@ self.onmessage = (e: MessageEvent) => {
     logoTex = tex
 
     const aspect = bitmap.width / bitmap.height
-    const LW = 6.0
+    const LW = 8.0
     const LH = LW / aspect
 
     logoGroup = new THREE.Group()
