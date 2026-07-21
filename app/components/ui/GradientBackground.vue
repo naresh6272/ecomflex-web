@@ -22,6 +22,11 @@
   pointer-events: none;
   z-index: -1;
   overflow: hidden;
+  /* White base — sits between html background and the transparent body */
+  background-color: #FFFFFF;
+}
+:root[data-theme="dark"] .gb-root {
+  background-color: #06090f;
 }
 
 /* ── dot grid ─────────────────────────────────────────────── */
@@ -45,41 +50,41 @@
 
 /* Blue — top-left, large */
 .gb-blue-1 {
-  width: 800px; height: 800px;
-  background: radial-gradient(circle, rgba(37,99,235,0.28) 0%, transparent 70%);
-  filter: blur(100px);
-  top: -320px; left: -280px;
+  width: 900px; height: 900px;
+  background: radial-gradient(circle, rgba(37,99,235,0.38) 0%, transparent 68%);
+  filter: blur(90px);
+  top: -380px; left: -320px;
   animation: drift-1 28s ease-in-out infinite;
 }
 /* Violet — bottom-right */
 .gb-violet {
-  width: 700px; height: 700px;
-  background: radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%);
-  filter: blur(110px);
-  bottom: -260px; right: -220px;
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(124,58,237,0.30) 0%, transparent 68%);
+  filter: blur(100px);
+  bottom: -320px; right: -260px;
   animation: drift-2 32s ease-in-out infinite 3s;
 }
 /* Amber — top-right */
 .gb-amber {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(245,158,11,0.20) 0%, transparent 70%);
-  filter: blur(90px);
-  top: -100px; right: -140px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(245,158,11,0.26) 0%, transparent 68%);
+  filter: blur(80px);
+  top: -120px; right: -160px;
   animation: drift-3 24s ease-in-out infinite 6s;
 }
 /* Blue-2 — bottom-left */
 .gb-blue-2 {
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(37,99,235,0.16) 0%, transparent 70%);
-  filter: blur(120px);
-  bottom: -200px; left: 10%;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(37,99,235,0.22) 0%, transparent 68%);
+  filter: blur(110px);
+  bottom: -240px; left: 8%;
   animation: drift-4 36s ease-in-out infinite 1.5s;
 }
 /* Cyan accent — centre */
 .gb-cyan {
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(6,182,212,0.14) 0%, transparent 70%);
-  filter: blur(80px);
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(6,182,212,0.20) 0%, transparent 68%);
+  filter: blur(75px);
   top: 40%; left: 45%;
   transform: translate(-50%, -50%);
   animation: drift-5 20s ease-in-out infinite 4s;

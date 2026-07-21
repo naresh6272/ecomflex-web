@@ -257,17 +257,24 @@ html, body { background: var(--color-bg); }
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
-  /* scroll-behavior: smooth removed — Lenis handles scrolling */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  /* White fallback — shows before Vue mounts so there's no flash */
+  background: #ffffff;
 }
+html[data-theme="dark"] { background: #06090f; }
 
 body {
   background: var(--color-bg);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   overflow-x: hidden;
+}
+/* Light theme: body transparent so the fixed GradientBackground
+   (z-index:-1, between html and body) shows its animated orbs through */
+:root[data-theme="light"] body {
+  background: transparent;
 }
 
 
