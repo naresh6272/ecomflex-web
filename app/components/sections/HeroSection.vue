@@ -296,10 +296,14 @@ onBeforeUnmount(() => {
   line-height:1.0; letter-spacing:-0.04em; color:#ffffff; margin:0 0 2.2rem;
 }
 .hero-word { display:inline-block; will-change:transform,opacity; }
-/* Dark mode: plain white — matches the rest of the hero heading */
+/* Dark mode: light-blue → soft-violet → amber flowing gradient */
 .gradient-text {
-  color: #ffffff;
-  -webkit-text-fill-color: #ffffff;
+  background: linear-gradient(120deg, #60A5FA, #A78BFA, #F59E0B, #60A5FA, #A78BFA);
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: grad-shift 4s linear infinite;
 }
 /* Light mode only: flowing gold → maroon gradient */
 :root[data-theme="light"] .gradient-text {
@@ -382,7 +386,7 @@ onBeforeUnmount(() => {
 
   /* Center all hero text */
   .hero-tag  { display: flex; justify-content: center; }
-  .hero-h1   { text-align: center; font-size: clamp(2.6rem, 10.5vw, 3.5rem); }
+  .hero-h1   { text-align: center; }
   .hero-sub  { text-align: center; margin-left: auto; margin-right: auto; max-width: 36ch; }
   .hero-ctas { justify-content: center; }
 
